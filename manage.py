@@ -48,7 +48,7 @@ def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
 
 @app.route("/init_db")
 def create():
-    # db.drop_all()
+    db.drop_all()
     db.create_all()
     return "db inited"
 

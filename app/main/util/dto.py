@@ -32,13 +32,7 @@ searchWordsIn = {
         'is_frozen': fields.String(required=False, description='is_frozen'),
         'orgid': fields.Integer(required=False, description='orgid')
     }
-updateIn = {
-        'username': fields.String(required=False, description='name'),
-        'password': fields.String(required=False, description='name'),
-        'orgid': fields.Integer(required=False, description='orgid'),
-        'sysrole': fields.String(required=False, description='sysrole'),
-        'comment': fields.String(required=False, description='sysrole'),
-    }
+
 
 IDs_In = {
     'id': fields.List(fields.Integer, required=True, description='提供多个编号，列表类型'),
@@ -104,9 +98,15 @@ class User_DTO:
         'orgid': fields.Integer()
     })
 
-    searchWordsIn = ns.model('searchIn', searchWordsIn)
-    updateIn = ns.model('updateIn', updateIn)
+    updateIn = ns.model('user_Update', {
+        'username': fields.String(required=False, description='name'),
+        'password': fields.String(required=False, description='name'),
+        'orgid': fields.Integer(required=False, description='orgid'),
+        'sysrole': fields.String(required=False, description='sysrole'),
+        'comment': fields.String(required=False, description='sysrole'),
+    })
 
+    searchWordsIn = ns.model('user_Search', searchWordsIn)
 
 
 class AuthDTO:
@@ -118,32 +118,54 @@ class AuthDTO:
     })
 
 
-class ProjectDTO:
+class Project_DTO:
+    # 创建命名空间。生成一个api文档
     ns = Namespace('project', description='project related operations')
 
-    projectIDsIn = ns.model('projectIDsIn', IDs_In)
+    project_IDs_In = ns.model('project_IDs_In', IDs_In)
 
-    searchWordsIn = ns.model('searchIn', searchWordsIn)
+    # 创建输入的DTO，对可输入字段进行过滤
+    project_In = ns.model('project_In', {
+        'projectname': fields.String(required=True, description='name'),
+        'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
+        'orgid': fields.Integer(required=False, description='orgid'),
+        'customer_contact': fields.String(required=False, description='客户对接人'),
+        'customer_email': fields.String(required=False, description='客户联系邮箱'),
+        'liaison_id': fields.Integer(required=False, description='联系人id'),
+        'comment': fields.String(required=False, description='comment')
+    }, strict=True)
 
-    projectOut = ns.model('projectOut', {
-        'id': fields.Integer(description='project id'),
-        'name': fields.String(required=True, description='project name'),
-        'custoid': fields.String(required=True, description='the org which the project belongs to'),
-        'owneruid': fields.Integer(required=True, description='the org which the project belongs to'),
-        'createtime': CustomDate(required=True, description='the org which the project belongs to'),
-        'createdbyuid': fields.Integer(required=True, description="the custom's organization who can manage the project"),
-        'status': fields.String(required=True, description='project status'),
-        'islocked': fields.Boolean(required=True, default=False, description='project status'),
-        'comments': fields.String(required=True, description='project comments'),
-        'lastmodifiedbyuid': fields.Integer(required=True, description='the last one who modified the project recently'),
-        'lastmodifiedtime': CustomDate(required=True, description='the last time the project was recently modified'),
+    project_Out = ns.model('project_Out', {
+        'id': fields.Integer(),
+        'projectname': fields.String(),
+        'project_manager': fields.String(),
+        'customer_contact': fields.String(),
+        'customer_email': fields.String(),
+        'liaison_name': fields.String(),
+        'liaison_email': fields.String(),
+        'test_number': fields.Integer(),
+        'is_frozen': fields.String(),
+        'comment': fields.String()
     })
 
-    projectIn = ns.model('projectIn', {
-        'name': fields.String(required=True, description='project name'),
-        'custoid': fields.Integer(required=True, description='the org which the project belongs to'),
-        'owneruid': fields.Integer(required=True, description='the org which the project belongs to'),
-        'comments': fields.String(description='project comments'),
+    updateIn = ns.model('project_Update', {
+        'projectname': fields.String(required=False, description='name'),
+        'project_manager_id': fields.String(required=False, description='project_manager_id'),
+        'customer_contact': fields.String(required=False, description='客户对接人'),
+        'customer_email': fields.String(required=False, description='客户联系邮箱'),
+        'liaison_id': fields.String(required=False, description='liaison_id'),
+        'comment': fields.String(required=False, description='sysrole')
+    })
+
+    searchIn = ns.model('project_Search', {
+        'id': fields.Integer(required=False, description='id'),
+        'projectname': fields.String(required=False, description='name'),
+        'create_time': fields.DateTime(required=False, description='create_time'),
+        'modified_time': fields.DateTime(required=False, description='modified_time'),
+        'orgname': fields.String(required=False, description='orgname'),
+        'orgid': fields.Integer(required=False, description='orgid'),
+        'project_manager': fields.String(required=False, description='project_manager'),
+        'is_frozen': fields.String(required=False, description='is_frozen')
     })
 
 

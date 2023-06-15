@@ -1,6 +1,7 @@
 from app.main.util.dto import User_DTO
 from flask import request
 from flask_restx import Resource
+from flask_jwt_extended import jwt_required
 from app.main.service.user_service import save_new_user, get_a_user, get_all_users, get_users_by_org_id, \
     operate_a_user, search_for_user, update_a_user
 from typing import Dict, Tuple
@@ -17,7 +18,6 @@ _user_Update = User_DTO.updateIn
 # 对所有用户
 @ns.route('/')
 class UserList(Resource):
-    # @jwt_required
     @ns.doc('list_of_registered_users')
     # @admin_token_required
     @ns.marshal_list_with(_user_Out, envelope='children')
@@ -25,6 +25,7 @@ class UserList(Resource):
         """List all registered users"""
         return get_all_users()
 
+    @jwt_required()
     @ns.expect(_user_In, validate=True)
     @ns.response(201, 'User successfully created.')
     @ns.doc('create a new user')
@@ -45,18 +46,25 @@ class User(Resource):
         """get a user by its identifier"""
         user = get_a_user(id)
         if not user:
-            return response_with(INVALID_INPUT_422)
+            ns.abort(404)
         else:
             return user
 
+    @jwt_required()
     @ns.doc('update a user')
     @ns.response(201, 'User successfully modified.')
     @ns.expect(_user_Update, validate=True)
     def put(self, id):
         """update a user by its identifier"""
+        # user = get_a_user(id)
+        # if not user:
+        #     return response_with(INVALID_INPUT_422)
+        #
+        # else:
         return update_a_user(id)
 
     # 没事别写乱七八糟的装饰器
+    @jwt_required()
     @ns.doc('delete a user')
     def delete(self, id):
         """Delete a user by identifier"""
@@ -65,7 +73,6 @@ class User(Resource):
             ns.abort(404)
         else:
             return operate_a_user(id, "delete")
-            # return PatchUser.patch(id, "delete")
 
 
 @ns.route('/<id>/action/<operator>')
@@ -74,10 +81,11 @@ class User(Resource):
 @ns.response(404, 'User not found.')
 class PatchUser(Resource):
     """user view"""
+    @jwt_required()
     @ns.doc('modify a user')
     def patch(self, id, operator):
         """modify the status of users, status enum: lock|unlock"""
-        user, http_code = get_a_user(id)
+        user = get_a_user(id)
         if not user:
             ns.abort(404)
         else:
@@ -87,14 +95,14 @@ class PatchUser(Resource):
 @ns.route('/search')
 class SearchForUsers(Resource):
     """user view"""
-
-    @ns.doc('list_of_registered_users')
-    @ns.marshal_list_with(_user_Out, envelope='children')
+    @ns.doc('search_users')
+    @ns.marshal_list_with(_user_In, envelope='children')
     @ns.expect(_user_Search, validate=True)
     def post(self):
         """search for users by id, partial_name, create_time, modify_time"""
         data = request.json
         return search_for_user(data)
+
 
 # 通过公司查询
 @ns.route('/organization/<id>')

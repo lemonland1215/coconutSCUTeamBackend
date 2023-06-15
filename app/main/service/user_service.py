@@ -5,7 +5,6 @@ from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
 from datetime import datetime
-from app.main.util.response_tip import *
 
 
 @jwt_required()
@@ -30,7 +29,7 @@ def get_all_users():
 
 
 def get_a_user(id):
-    return User.query.filter_by(id=id).first(), 201
+    return User.query.filter_by(id=id).first()
 
 
 def generate_token(user: User) -> Tuple[Dict[str, str], int]:
@@ -84,7 +83,7 @@ def operate_a_user(id, operator):
     db.session.commit()
     response_object = {
         'code': 'success',
-        'message': f'User {id} updated!'.format()
+        'message': f'User {id} {operator}!'.format().format()
     }
     return response_object, 201
 
@@ -131,7 +130,6 @@ def save_changes(data: User) -> None:
     db.session.commit()
 
 
-    ######################## update ########################33
 @jwt_required()
 def update_a_user(id):
     tmp_user = User.query.filter_by(id=id).first()

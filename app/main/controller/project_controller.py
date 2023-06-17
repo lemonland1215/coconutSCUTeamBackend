@@ -18,7 +18,7 @@ _project_Update = Project_DTO.updateIn
 
 
 @ns.route('/')
-class UserList(Resource):
+class ProjectList(Resource):
     @ns.doc('list_of_registered_projects')
     # @admin_token_required
     @ns.marshal_list_with(_project_Out, envelope='children')
@@ -28,7 +28,7 @@ class UserList(Resource):
 
     @jwt_required()
     @ns.expect(_project_In, validate=True)
-    @ns.response(201, 'User successfully created.')
+    @ns.response(201, 'Project successfully created.')
     @ns.doc('create a new project')
     def post(self) -> Tuple[Dict[str, str], int]:
         """Creates a new project """

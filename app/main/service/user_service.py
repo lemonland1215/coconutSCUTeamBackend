@@ -1,13 +1,13 @@
 from flask import request
 from app.main import db
 from app.main.model.user import User
+from app.main.model.liaison import Liaison
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
 from datetime import datetime
 
 
-@jwt_required()
 def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     user = User.query.filter_by(email=data['email']).first()
     if not user:
@@ -25,7 +25,7 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 
 
 def get_all_users():
-    return User.query.all()
+    return User.query.all(), 200
 
 
 def get_a_user(id):
@@ -51,10 +51,9 @@ def generate_token(user: User) -> Tuple[Dict[str, str], int]:
 
 def get_users_by_org_id(id):
     users = User.query.filter_by(orgid=id).all()
-    return users, 201
+    return users, 200
 
 
-@jwt_required()
 def operate_a_user(id, operator):
     tmp_user = User.query.filter_by(id=id).first()
     if not tmp_user:
@@ -122,7 +121,7 @@ def search_for_user(data):
         print("无orgid")
 
     print(tmp_user.all())
-    return tmp_user.all(), 201
+    return tmp_user.all(), 200
 
 
 def save_changes(data: User) -> None:
@@ -130,7 +129,6 @@ def save_changes(data: User) -> None:
     db.session.commit()
 
 
-@jwt_required()
 def update_a_user(id):
     tmp_user = User.query.filter_by(id=id).first()
     if not tmp_user:
@@ -142,6 +140,11 @@ def update_a_user(id):
     wj2o(tmp_user, update_val)
     tmp_user.modified_time = datetime.now()
     save_changes(tmp_user)
+    liaison = db.session.query(Liaison).filter(Liaison.liaison_id == id).first()
+    if liaison:
+        print(update_val['username'])
+        liaison.liaison_name = update_val['username']
+        save_changes(liaison)
     response_object = {
         'code': 'success',
         'message': f'User {id} updated!'.format()

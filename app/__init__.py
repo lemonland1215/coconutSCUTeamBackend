@@ -5,6 +5,7 @@ from .main.controller.organization_controller import ns as organization_ns
 from .main.controller.user_controller import ns as user_ns
 from .main.controller.auth_controller import ns as auth_ns
 from .main.controller.project_controller import ns as project_ns
+from .main.controller.task_controller import ns as task_ns
 
 api_blueprint = Blueprint('flask-restx', __name__)
 authorizations = {
@@ -28,3 +29,5 @@ api.add_namespace(organization_ns, path='/organization')
 api.add_namespace(user_ns, path='/user')
 api.add_namespace(auth_ns, path='/auth')
 api.add_namespace(project_ns, path='/project')
+api.add_namespace(task_ns, path='/task')
+

@@ -168,8 +168,42 @@ class Project_DTO:
         'is_frozen': fields.String(required=False, description='is_frozen')
     })
 
+class Task_DTO:
+    ns = Namespace('task', description='task related operations')
 
-class HTML_Template_DTO:
+    taskIDsIn = ns.model('taskIDsIn', IDs_In)
+
+    taskIn = ns.model('taskIn', {
+        'name': fields.String(required=True, description='organization name'),
+        'logopath': fields.String(required=True, default="N/A", description='organization logo\'s file path'),
+        'istoporg': fields.Boolean(required=True, default=False, description='is it a top organization'),
+        'higherorgid': fields.Integer(required=True, description='higher organization id'),
+        'islocked': fields.Boolean(required=True, default=False, description='can organization be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can organization be operated'),
+        'frozenbyuid': fields.Integer(description='frozen id'),
+        'clientcontact': fields.String(required=True, description='client contact name'),
+        'comments': fields.String(required=True, description='organization comments'),
+    }, strict=True)
+
+    taskOut = ns.model('taskOut', {
+        'id': fields.Integer(description='organization id'),
+        'name': fields.String(description='organization name'),
+        'logopath': fields.String(description='organization logo\'s file path'),
+        'istoporg': fields.Boolean(description='is it a top organization'),
+        'higherorgid': fields.Integer(description='organization id'),
+        'islocked': fields.Boolean(description='can organization be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can organization be operated'),
+        'createtime': CustomDate(required=True, description='the time when the organization created'),
+        'modifytime': CustomDate(required=False, dt_format='str_time', description='like topic mentioned'),
+        'freezetime': CustomDate(required=False, dt_format='str_time', description='like topic mentioned'),
+        'clientcontact': fields.String(required=True, description='client contact name'),
+        'comments': fields.String(description='organization comments'),
+    })
+
+    searchWordsIn = ns.model('searchIn', searchWordsIn)
+
+
+class Mail_DTO:
     ns = Namespace('template_html', description='html template related operations')
 
     html_templateIDsIn = ns.model('html_templateIDsIn', IDs_In)

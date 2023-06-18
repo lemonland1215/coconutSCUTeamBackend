@@ -1,4 +1,5 @@
 from flask_restx import Namespace, fields
+from datetime import datetime
 
 CustomDate = fields.DateTime
 
@@ -171,37 +172,98 @@ class Project_DTO:
         'is_frozen': fields.String(required=False, description='is_frozen')
     })
 
+class Task_DTO:
+    ns = Namespace('task', description='task related operations')
 
-class HTML_Template_DTO:
+    taskIDsIn = ns.model('taskIDsIn', IDs_In)
+
+    taskIn = ns.model('taskIn', {
+        'name': fields.String(required=True, description='task name'),
+        'project_id': fields.Integer(required=True, description='project id'),
+        'type': fields.String(required=True, description='task type'),
+        'mail_id': fields.Integer(required=True, description='mail template id'),
+        'status': fields.String(required=True, default='running', descripition='task status'),
+        'catcher_id': fields.Integer(required=True, descripition='cather server id'),
+        'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
+        'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),
+        # 'project_manager': fields.String(required=True, description='task manager name(yifang)'),
+        'target_num': fields.Integer(required=False, descripition='target num'),
+        'target_id_list': fields.String(required=True, description='target list'),
+        'delivery_name': fields.String(required=True, description='the name of the person that deliver the mail'),
+        'delivery_time': CustomDate(required=False, default=datetime(2023, 6, 20, 0, 0, 0, 361636), description='发件时间'),
+        'delivery_address': fields.String(required=True, description='the address of the delivery, like:deliver@mail'),
+        'delivery_freq': fields.Integer(required=True, description='the frequency of the sending mails'),
+        'mail_server_id': fields.Integer(required=True, description='server id'),
+        'mail_server_name': fields.String(required='True', description='server name'),
+        'islocked': fields.Boolean(required=True, default=False, description='can task be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
+        'ispause': fields.Boolean(required=False, default=False, description='is this task still running'),
+        'frozenbyuid': fields.Integer(description='frozen id'),
+        'comments': fields.String(required=False, description='organization comments'),
+    }, strict=True)
+
+    taskOut = ns.model('taskOut', {
+        'id': fields.Integer(description='task id'),
+        'name': fields.String(description='task name'),
+        'project_id': fields.String(description='top project id'),
+        'type': fields.String(description='mail type'),
+        'catcher_name': fields.String(description='catcher server name'),
+        'report_status': fields.Boolean(required=True, default=False, description='dose report be generated'),
+        'delivery_address': fields.String(description='delivery address'),
+        'delivery_freq': fields.Integer(required=True, description='the frequency mail send'),
+        'islocked': fields.Boolean(description='can task be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
+        'ispause': fields.Boolean(default=False, description='just be paused, can be modified'),
+        'createtime': CustomDate(required=True, description='the time when the task created'),
+        'modifytime': CustomDate(required=False, dt_format='str_time', description='the time that be modified'),
+        'freezetime': CustomDate(required=False, dt_format='str_time', description='the time that be frozen'),
+        'puasetime': CustomDate(required=False, dt_format='str_time', description='the time that be puased'),
+        'clientcontact': fields.String(required=True, description='client contact name'),
+        'comments': fields.String(description='organization comments'),
+    })
+
+    searchIn = ns.model('task_Search', {
+        'id': fields.Integer(required=False, description='id'),
+        'name': fields.String(required=False, description='name'),
+        'createtime': fields.DateTime(required=False, description='create_time'),
+        'modifytime': fields.DateTime(required=False, description='modified_time'),
+        # 'manager_name': fields.String(required=False, description='manager_name'),
+        # 'org_name': fields.String(required=False, description='org_name'),
+        'is_frozen': fields.String(required=False, description='is_frozen')
+    })
+
+    searchWordsIn = ns.model('searchIn', searchWordsIn)
+
+
+class Mail_DTO:
     ns = Namespace('template_html', description='html template related operations')
 
     html_templateIDsIn = ns.model('html_templateIDsIn', IDs_In)
 
     html_template_in = ns.model('html_template_in', {
-        'type': fields.Integer(reqired=True, default=1, description='模板类型：如文本/html、二进制、office等'),
-        'name': fields.String(reqired=True, default="1", description='模板名称;例：中石油-上级发文，xx局-入学通知，xx部门-人事任免公告等'),
+        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
         'subject': fields.String(reqired=True, default="1", description='邮件主题'),
         'content': fields.String(reqired=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
-        'ishidden': fields.Boolean(description='是否隐藏;隐藏：不可被选择使用'),
         'comments': fields.String(description='备注'),
     })
 
     html_template_out = ns.model('html_template_out', {
         'id': fields.Integer(description='html template id'),
-        'type': fields.Integer(description='模板类型：如文本/html、二进制、office等'),
-        'name': fields.String(description='模板名称;例：中石油-上级发文，xx局-入学通知，xx部门-人事任免公告等'),
-        'subject': fields.String(description='邮件主题'),
-        'content': fields.String(description='邮件内容'),
+        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
+        'subject': fields.String(reqired=True, default="1", description='邮件主题'),
+        'content': fields.String(reqired=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
+        'comments': fields.String(description='备注'),
         'createtime': fields.DateTime(description='创建时间'),
         'createdbyuid': fields.Integer(description='创建人编号'),
-        'lastmodifiedtime': fields.DateTime(description='修改时间'),
-        'lastmodifiedbyuid': fields.Integer(description='修改人编号'),
-        'ishidden': fields.Boolean(description='是否隐藏;不可被选择使用'),
-        'comments': fields.String(description='备注'),
+        'modifytime': fields.DateTime(description='修改时间'),
+        'modifybyuid': fields.Integer(description='修改人编号'),
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
+
+class File_DTO:
+    ns = Namespace('upload', description='file and image related operations')

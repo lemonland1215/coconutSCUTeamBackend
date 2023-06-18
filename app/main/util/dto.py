@@ -234,3 +234,6 @@ class Mail_DTO:
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
+
+class File_DTO:
+    ns = Namespace('upload', description='file and image related operations')

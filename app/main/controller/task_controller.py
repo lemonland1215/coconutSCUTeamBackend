@@ -15,7 +15,7 @@ from ..util.write_json_to_obj import wj2o
 ns = Task_DTO.ns
 _taskIn = Task_DTO.taskIn
 _taskOut = Task_DTO.taskOut
-_searchWordsIn = Task_DTO.searchWordsIn
+_task_Search = Task_DTO.searchIn
 _taskIDsIn = Task_DTO.taskIDsIn
 
 @ns.route('/')
@@ -82,9 +82,9 @@ class SearchForTasks(Resource):
 
     @ns.doc('search for orgs')
     @ns.marshal_list_with(_taskOut, envelope='children')
-    @ns.expect(_searchWordsIn, validate=True)
+    @ns.expect(_task_Search, validate=True)
     def post(self):
-        """search for tasks by id, partial_name, create_time, modify_time, status, mail_server_name, catcher_name"""
+        """search for tasks by 编号、名称、创建日期、修改日期、机构名称、项目经理、冻结状态 (注：机构name&项目经理暂时注释了)"""
         data = request.json
         return search_for_tasks(data)
 

@@ -1,4 +1,5 @@
 from flask_restx import Namespace, fields
+from datetime import datetime
 
 CustomDate = fields.DateTime
 
@@ -176,30 +177,58 @@ class Task_DTO:
     taskIDsIn = ns.model('taskIDsIn', IDs_In)
 
     taskIn = ns.model('taskIn', {
-        'name': fields.String(required=True, description='organization name'),
-        'logopath': fields.String(required=True, default="N/A", description='organization logo\'s file path'),
-        'istoporg': fields.Boolean(required=True, default=False, description='is it a top organization'),
-        'higherorgid': fields.Integer(required=True, description='higher organization id'),
-        'islocked': fields.Boolean(required=True, default=False, description='can organization be modified'),
-        'isfrozen': fields.Boolean(required=True, default=False, description='can organization be operated'),
+        'name': fields.String(required=True, description='task name'),
+        'project_id': fields.Integer(required=True, description='project id'),
+        'type': fields.String(required=True, description='task type'),
+        'mail_id': fields.Integer(required=True, description='mail template id'),
+        'status': fields.String(required=True, default='running', descripition='task status'),
+        'catcher_id': fields.Integer(required=True, descripition='cather server id'),
+        'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
+        'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),
+        # 'project_manager': fields.String(required=True, description='task manager name(yifang)'),
+        'target_num': fields.Integer(required=False, descripition='target num'),
+        'target_id_list': fields.String(required=True, description='target list'),
+        'delivery_name': fields.String(required=True, description='the name of the person that deliver the mail'),
+        'delivery_time': CustomDate(required=False, default=datetime(2023, 6, 20, 0, 0, 0, 361636), description='发件时间'),
+        'delivery_address': fields.String(required=True, description='the address of the delivery, like:deliver@mail'),
+        'delivery_freq': fields.Integer(required=True, description='the frequency of the sending mails'),
+        'mail_server_id': fields.Integer(required=True, description='server id'),
+        'mail_server_name': fields.String(required='True', description='server name'),
+        'islocked': fields.Boolean(required=True, default=False, description='can task be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
+        'ispause': fields.Boolean(required=False, default=False, description='is this task still running'),
         'frozenbyuid': fields.Integer(description='frozen id'),
-        'clientcontact': fields.String(required=True, description='client contact name'),
-        'comments': fields.String(required=True, description='organization comments'),
+        'comments': fields.String(required=False, description='organization comments'),
     }, strict=True)
 
     taskOut = ns.model('taskOut', {
-        'id': fields.Integer(description='organization id'),
-        'name': fields.String(description='organization name'),
-        'logopath': fields.String(description='organization logo\'s file path'),
-        'istoporg': fields.Boolean(description='is it a top organization'),
-        'higherorgid': fields.Integer(description='organization id'),
-        'islocked': fields.Boolean(description='can organization be modified'),
-        'isfrozen': fields.Boolean(required=True, default=False, description='can organization be operated'),
-        'createtime': CustomDate(required=True, description='the time when the organization created'),
-        'modifytime': CustomDate(required=False, dt_format='str_time', description='like topic mentioned'),
-        'freezetime': CustomDate(required=False, dt_format='str_time', description='like topic mentioned'),
+        'id': fields.Integer(description='task id'),
+        'name': fields.String(description='task name'),
+        'project_id': fields.String(description='top project id'),
+        'type': fields.String(description='mail type'),
+        'catcher_name': fields.String(description='catcher server name'),
+        'report_status': fields.Boolean(required=True, default=False, description='dose report be generated'),
+        'delivery_address': fields.String(description='delivery address'),
+        'delivery_freq': fields.Integer(required=True, description='the frequency mail send'),
+        'islocked': fields.Boolean(description='can task be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
+        'ispause': fields.Boolean(default=False, description='just be paused, can be modified'),
+        'createtime': CustomDate(required=True, description='the time when the task created'),
+        'modifytime': CustomDate(required=False, dt_format='str_time', description='the time that be modified'),
+        'freezetime': CustomDate(required=False, dt_format='str_time', description='the time that be frozen'),
+        'puasetime': CustomDate(required=False, dt_format='str_time', description='the time that be puased'),
         'clientcontact': fields.String(required=True, description='client contact name'),
         'comments': fields.String(description='organization comments'),
+    })
+
+    searchIn = ns.model('task_Search', {
+        'id': fields.Integer(required=False, description='id'),
+        'name': fields.String(required=False, description='name'),
+        'createtime': fields.DateTime(required=False, description='create_time'),
+        'modifytime': fields.DateTime(required=False, description='modified_time'),
+        # 'manager_name': fields.String(required=False, description='manager_name'),
+        # 'org_name': fields.String(required=False, description='org_name'),
+        'is_frozen': fields.String(required=False, description='is_frozen')
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)

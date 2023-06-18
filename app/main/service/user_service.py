@@ -87,6 +87,14 @@ def operate_a_user(id, operator):
     return response_object, 201
 
 
+def delete_users():
+    user = User.query.all()
+    for tmp_user in user:
+        db.session.delete(tmp_user)
+    db.session.commit()
+    return f"delete success", 201
+
+
 def search_for_user(data):
     tmp_user = User.query
     try:

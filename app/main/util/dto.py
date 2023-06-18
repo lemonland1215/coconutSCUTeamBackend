@@ -128,19 +128,19 @@ class Project_DTO:
     # 创建输入的DTO，对可输入字段进行过滤
     project_In = ns.model('project_In', {
         'projectname': fields.String(required=True, description='name'),
-        'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
-        'orgid': fields.Integer(required=False, description='orgid'),
+        'project_manager_id': fields.Integer(required=True, default=1, description='project_manager_id'),
+        'orgid': fields.Integer(required=True, default=1, description='orgid'),
         'customer_contact': fields.String(required=False, description='客户对接人'),
         'contact_email': fields.String(required=False, description='客户联系邮箱'),
-        'liaison_id': fields.Integer(required=False, description='联系人id'),
-        'comment': fields.String(required=False, description='comment'),
-        # 'status': fields.String(required=True, description='status')
+        'liaison_id': fields.Integer(required=True, default=1, description='联系人id'),
+        'comment': fields.String(required=False, description='comment')
     }, strict=True)
 
     project_Out = ns.model('project_Out', {
         'id': fields.Integer(),
         'projectname': fields.String(),
         'project_manager': fields.String(),
+        'organization_name': fields.String(),
         'customer_contact': fields.String(),
         'contact_email': fields.String(),
         'liaison_name': fields.String(),
@@ -148,23 +148,24 @@ class Project_DTO:
         'test_number': fields.Integer(),
         'is_frozen': fields.String(),
         'comment': fields.String(),
-        'status': fields.String()
+        'status': fields.String(),
+        'create_time': fields.String()
     })
 
     updateIn = ns.model('project_Update', {
         'projectname': fields.String(required=False, description='name'),
-        'project_manager_id': fields.String(required=False, description='project_manager_id'),
+        'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
         'customer_contact': fields.String(required=False, description='客户对接人'),
         'contact_email': fields.String(required=False, description='客户联系邮箱'),
-        'liaison_id': fields.String(required=False, description='liaison_id'),
+        'liaison_id': fields.Integer(required=False, description='liaison_id'),
         'comment': fields.String(required=False, description='sysrole')
     })
 
     searchIn = ns.model('project_Search', {
         'id': fields.Integer(required=False, description='id'),
         'projectname': fields.String(required=False, description='name'),
-        'create_time': fields.DateTime(required=False, description='create_time'),
-        'modified_time': fields.DateTime(required=False, description='modified_time'),
+        'create_time': fields.String(required=False, description='create_time'),
+        'modified_time': fields.String(required=False, description='modified_time'),
         'orgname': fields.String(required=False, description='orgname'),
         'orgid': fields.Integer(required=False, description='orgid'),
         'project_manager': fields.String(required=False, description='project_manager'),

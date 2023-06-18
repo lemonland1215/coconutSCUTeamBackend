@@ -159,19 +159,20 @@ def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
 
-def send_mails_of_task(id):
-    mail = Mail()
-    tem_task = Task.query.filter_by(id=id).first()
-    target_id_list = json.loads(tem_task.target_id_list)
-    for uid in target_id_list:
-        tem_user = User.query.filter_by(id=uid).first()
-        reci = tem_user.email
-        msg = Message("qqHello "+str(uid), recipients=[reci])
-        msg.body = "Hello Flask message sent from Flask-Mail"
-        mail.send(msg)
+# def send_mails_of_task(id):
+#     mail = Mail()
+#     tem_task = Task.query.filter_by(id=id).first()
+#     target_id_list = json.loads(tem_task.target_id_list)
+#     for uid in target_id_list:
+#         tem_user = User.query.filter_by(id=uid).first()
+#         reci = tem_user.email
+#         msg = Message("qqHello "+str(uid), recipients=[reci])
+#         msg.body = "Hello Flask message sent from Flask-Mail"
+#         mail.send(msg)
+#
+#     response_object = {
+#         'code': 'success',
+#         'message': 'success'
+#     }
+#     return response_object, 201
 
-    response_object = {
-        'code': 'success',
-        'message': 'success'
-    }
-    return response_object, 201

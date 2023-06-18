@@ -18,11 +18,22 @@ class BaseConfig:
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024
 
     # MTA Configuration
-    MAIL_SERVER = 'mail.xxx.com'
-    MAIL_PORT = 123
-    MAIL_USERNAME = 'xxx@xxx.com'
-    MAIL_PASSWORD = 'passpasspass'
-    MAIL_USE_TLS = True
+    MAIL_SERVER = 'smtp.qq.com'
+    MAIL_PORT = 465
+    MAIL_USERNAME = '2451875383@qq.com'
+    MAIL_PASSWORD = 'jdnqgxgvaxbvdibd'
+    MAIL_DEFAULT_SENDER = "2451875383@qq.com"
+    MAIL_USE_SSL = True
+    MAIL_USE_TLS = False
+
+class QMailConfig(BaseConfig):
+    MAIL_SERVER = 'smtp.qq.com'
+    MAIL_PORT = 465
+    MAIL_USERNAME = '2451875383@qq.com'
+    MAIL_PASSWORD = 'jdnqgxgvaxbvdibd'
+    MAIL_DEFAULT_SENDER = "hello"
+    MAIL_USE_SSL = True
+    MAIL_USE_TLS = False
 
 
 

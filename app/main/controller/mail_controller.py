@@ -124,7 +124,7 @@ class PatchAMailTemplate(Resource):
 class SendMailofTask(Resource):
     """task view"""
     @ns.doc('send mails of a task')
-    def get(self):
+    def get(self, id):
         """send mails of a task"""
         send_mails_of_task(id)
         return response_with(SUCCESS_201)

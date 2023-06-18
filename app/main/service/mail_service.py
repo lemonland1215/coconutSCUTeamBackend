@@ -4,8 +4,12 @@ from flask import request
 from app.main import db
 from typing import Dict, Tuple
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from config import QMailConfig
+from flask_mail import Mail, Message
+import json
 
 from app.main.model.task import Task
+from app.main.model.user import User
 from app.main.util.response_tip import *
 from app.main.util.write_json_to_obj import wj2o
 
@@ -134,5 +138,24 @@ def save_changes(data: Mailtemplate) -> None:
     db.session.commit()
 
 
+
+
+
 def send_mails_of_task(id):
-    pass
+    mail = Mail()
+    tem_task = Task.query.filter_by(id=id).first()
+    target_id_list = json.loads(tem_task.target_id_list)
+    for uid in target_id_list:
+        tem_user = User.query.filter_by(id=uid).first()
+        reci = tem_user.email
+        msg = Message("qqHello "+str(uid), recipients=[reci])
+        msg.body = "Hello Flask message sent from Flask-Mail"
+        mail.send(msg)
+
+    response_object = {
+        'code': 'success',
+        'message': 'success'
+    }
+    return response_object, 201
+
+

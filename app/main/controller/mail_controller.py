@@ -4,7 +4,7 @@ from flask_restx import Resource
 
 from app.main import db
 from ..util.dto import Mail_DTO
-from ..service.task_service import *
+from ..service.mail_service import *
 from typing import Dict, Tuple
 
 from ..util.file import upload_file
@@ -85,38 +85,50 @@ class SearchForMailTemplates(Resource):
     def post(self):
         """search for tasks by id, partial_name, create_time, modify_time, status, mail_server_name, catcher_name"""
         data = request.json
-        return search_for_tasks(data)
+        return search_for__mail_templates(data)
 
-@ns.route('/action/<operator>')
+@ns.route('/template/action/<operator>')
 @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart|stop|finish, delete etc')
 @ns.response(404, 'Task not found.')
-class PatchTasks(Resource):
+class PatchMailTemplates(Resource):
     """task view"""
 
-    @ns.doc('operate tasks')
-    @ns.expect(_taskIDsIn, validate=True)
+    @ns.doc('operate MailTemplates')
+    @ns.expect(_htmlTemplateIn, validate=True)
     def patch(self, operator):
         """modify the status of a task"""
-        taskIDs = request.json
-        for id in taskIDs['data']:
-            operate_a_task(id, operator)
+        MailTemplatesIDs = request.json
+        for id in MailTemplatesIDs['data']:
+            operate_a_mail_template(id, operator)
         return response_with(SUCCESS_201)
 
-@ns.route('/<id>/action/<operator>')
+@ns.route('/template/<id>/action/<operator>')
 @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart|stop|finish, delete etc')
-@ns.param('id', 'The Task identifier')
+@ns.param('id', 'The MailTemplate identifier')
 @ns.response(404, 'Task not found.')
-class PatchATask(Resource):
+class PatchAMailTemplate(Resource):
     """task view"""
 
-    @ns.doc('modify a task status')
+    @ns.doc('modify a MailTemplate status')
     def patch(self, id, operator):
         """modify the status of organizations, status enum: lock|unlock"""
-        task, http_code = get_a_task(id)
+        task, http_code = get_a_mail_template(id)
         if not task:
             ns.abort(404)
         else:
-            return operate_a_task(id, operator)
+            return operate_a_mail_template(id, operator)
+
+@ns.route('/sendmail/<id>')
+# @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart|stop|finish, delete etc')
+@ns.param('id', 'The Task identifier')
+@ns.response(404, 'Task not found.')
+class SendMailofTask(Resource):
+    """task view"""
+    @ns.doc('send mails of a task')
+    def get(self):
+        """send mails of a task"""
+        send_mails_of_task(id)
+        return response_with(SUCCESS_201)
 
 
 

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from flask import request
 from app.main import db
 from app.main.model.task import Task
@@ -157,6 +156,3 @@ def operate_a_task(id, operator):
 def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
-=======
-from app.main.model.task import Task
->>>>>>> dc26558c0a3ea24c2cc9795282d57f1d05f2489a

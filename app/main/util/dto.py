@@ -227,8 +227,9 @@ class Task_DTO:
         'name': fields.String(required=False, description='name'),
         'createtime': fields.DateTime(required=False, description='create_time'),
         'modifytime': fields.DateTime(required=False, description='modified_time'),
-        # 'manager_name': fields.String(required=False, description='manager_name'),
-        # 'org_name': fields.String(required=False, description='org_name'),
+        'project_name': fields.String(required=False, description='project_name'),
+        'project_id': fields.Integer(required=False, description='project_id'),
+        'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
         'is_frozen': fields.String(required=False, description='is_frozen')
     })
 

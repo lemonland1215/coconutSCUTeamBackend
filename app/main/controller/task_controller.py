@@ -84,7 +84,7 @@ class SearchForTasks(Resource):
     @ns.marshal_list_with(_taskOut, envelope='children')
     @ns.expect(_task_Search, validate=True)
     def post(self):
-        """search for tasks by 编号、名称、创建日期、修改日期、机构名称、项目经理、冻结状态 (注：机构name&项目经理暂时注释了)"""
+        """search for tasks by 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理"""
         data = request.json
         return search_for_tasks(data)
 

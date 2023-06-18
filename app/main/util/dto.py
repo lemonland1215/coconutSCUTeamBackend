@@ -240,30 +240,29 @@ class Mail_DTO:
     html_templateIDsIn = ns.model('html_templateIDsIn', IDs_In)
 
     html_template_in = ns.model('html_template_in', {
-        'type': fields.Integer(reqired=True, default=1, description='模板类型：如文本/html、二进制、office等'),
-        'name': fields.String(reqired=True, default="1", description='模板名称;例：中石油-上级发文，xx局-入学通知，xx部门-人事任免公告等'),
+        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
         'subject': fields.String(reqired=True, default="1", description='邮件主题'),
         'content': fields.String(reqired=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
-        'ishidden': fields.Boolean(description='是否隐藏;隐藏：不可被选择使用'),
         'comments': fields.String(description='备注'),
     })
 
     html_template_out = ns.model('html_template_out', {
         'id': fields.Integer(description='html template id'),
-        'type': fields.Integer(description='模板类型：如文本/html、二进制、office等'),
-        'name': fields.String(description='模板名称;例：中石油-上级发文，xx局-入学通知，xx部门-人事任免公告等'),
-        'subject': fields.String(description='邮件主题'),
-        'content': fields.String(description='邮件内容'),
+        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
+        'subject': fields.String(reqired=True, default="1", description='邮件主题'),
+        'content': fields.String(reqired=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
+        'comments': fields.String(description='备注'),
         'createtime': fields.DateTime(description='创建时间'),
         'createdbyuid': fields.Integer(description='创建人编号'),
-        'lastmodifiedtime': fields.DateTime(description='修改时间'),
-        'lastmodifiedbyuid': fields.Integer(description='修改人编号'),
-        'ishidden': fields.Boolean(description='是否隐藏;不可被选择使用'),
-        'comments': fields.String(description='备注'),
+        'modifytime': fields.DateTime(description='修改时间'),
+        'modifybyuid': fields.Integer(description='修改人编号'),
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
+
+class File_DTO:
+    ns = Namespace('upload', description='file and image related operations')

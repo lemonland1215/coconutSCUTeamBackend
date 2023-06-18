@@ -41,4 +41,3 @@ class Task(db.Model):
     modifytime = db.Column(db.DateTime, comment='修改时间')
     lockbyuid = db.Column(db.INTEGER, comment='发起锁定的人编号')
     locktime = db.Column(db.DateTime, comment='锁定时间')
-

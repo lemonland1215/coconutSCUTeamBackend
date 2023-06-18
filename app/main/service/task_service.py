@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from flask import request
 from app.main import db
 from app.main.model.task import Task
@@ -138,7 +137,7 @@ def operate_a_task(id, operator):
             tmp_task.ispaused = True
             tmp_task.pausetime = datetime.now()
             tmp_task.pausebyuid = get_jwt_identity()
-        elif operator == "unpause":
+        elif operator == "restart":
             tmp_task.ispaused = False
             tmp_task.pausetime = datetime.now()
             tmp_task.pausebyuid = get_jwt_identity()
@@ -157,6 +156,3 @@ def operate_a_task(id, operator):
 def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
-=======
-from app.main.model.task import Task
->>>>>>> dc26558c0a3ea24c2cc9795282d57f1d05f2489a

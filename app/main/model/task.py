@@ -23,7 +23,7 @@ class Task(db.Model):
     target_id_list = db.Column(db.String(255), nullable=False, comment='目标id列表')
     delivery_name = db.Column(db.String(16), nullable=False, comment='发件人名称')
     delivery_address = db.Column(db.String(255), nullable=False, comment='发件地址')
-    delivery_time = db.Column(db.DateTime, nullable=False, comment='发件时间')
+    delivery_time = db.Column(db.DateTime, nullable=False,default=datetime.now(), comment='发件时间')
     # delivery_time = db.Column(db.DateTime, comment='发件时间')
     delivery_freq = db.Column(db.INTEGER, nullable=False, comment='邮件发送频率(s)')
     mail_server_id = db.Column(db.INTEGER, nullable=False, comment='邮件服务器id')

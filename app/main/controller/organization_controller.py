@@ -140,7 +140,7 @@ class PatchOrganizations(Resource):
     def patch(self, operator):
         """modify the status of an org"""
         organizationIDs = request.json
-        for id in organizationIDs['data']:
+        for id in organizationIDs['id']:
             operate_an_organization(id, operator)
         return response_with(SUCCESS_201)
 

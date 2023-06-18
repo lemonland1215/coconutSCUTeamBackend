@@ -119,7 +119,16 @@ class PatchATask(Resource):
         else:
             return operate_a_task(id, operator)
 
-
+# @ns.route('/sendmail/<id>')
+# @ns.param('id', 'The Task identifier')
+# @ns.response(404, 'Task not found.')
+# class SendMailofTask(Resource):
+#     """task view"""
+#     @ns.doc('send mails of a task')
+#     def get(self, id):
+#         """send mails of a task"""
+#         send_mails_of_task(id)
+#         return response_with(SUCCESS_201)
 
 
 

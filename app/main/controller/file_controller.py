@@ -16,5 +16,5 @@ class File(Resource):
     @ns.doc('return a file')
     def get(self, filename):
         print(filename)
-        ''' show a file or image '''
+        """show a file or image"""
         return send_from_directory("static/upload/", filename)

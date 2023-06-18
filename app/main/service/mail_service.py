@@ -32,7 +32,7 @@ def save_new_mail_template(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
         }
         return response_object, 409
 
-def search_for__mail_templates(data):
+def search_for_mail_templates(data):
     # print("here")
     tmp_templates = Mailtemplate.query
     try:
@@ -73,6 +73,58 @@ def search_for__mail_templates(data):
     print(tmp_templates.all())
     return tmp_templates.all(), 201
 
+def operate_a_mail_template(id, operator):
+    """
+    操作包含：锁定|解锁、删除
+    Args:
+        id: organization id
+        operator:
+
+    Returns:
+
+    """
+    tmp_template = Mailtemplate.query.filter_by(id=id).first()
+
+    if not tmp_template:
+        return response_with(ITEM_NOT_EXISTS)
+    if tmp_template.islocked:
+        if operator != "unlock":
+            print('锁了')
+            return response_with(ITEM_LOCKED_400)
+        else:
+            tmp_template.islocked = False
+    else:
+        if operator == "lock":
+            tmp_template.islocked = True
+        elif operator == "delete":
+            db.session.delete(tmp_template)
+
+        else:
+            print("日怪嘞")
+            return response_with(INVALID_INPUT_422)
+
+    db.session.commit()
+    return response_with(SUCCESS_201)
+
+@jwt_required()
+def update_a_mail_template(id):
+    tmp_template = Mailtemplate.query.filter_by(id=id).first()
+    if not tmp_template:
+        return response_with(ITEM_NOT_EXISTS)
+    if tmp_template.islocked == True:
+        return response_with(ITEM_LOCKED_400)
+    update_val = request.json
+    update_val['modifiedbyuid'] = get_jwt_identity()
+    update_val['modifytime'] = datetime.now()
+    update_val['islocked'] = tmp_template.islocked
+    update_val['isfrozen'] = tmp_template.isfrozen
+    wj2o(tmp_template, update_val)
+    save_changes(tmp_template)
+    response_object = {
+        'code': 'success',
+        'message': f'Template {id} updated!'.format()
+    }
+    return response_object, 201
 
 
 
@@ -80,3 +132,7 @@ def search_for__mail_templates(data):
 def save_changes(data: Mailtemplate) -> None:
     db.session.add(data)
     db.session.commit()
+
+
+def send_mails_of_task(id):
+    pass

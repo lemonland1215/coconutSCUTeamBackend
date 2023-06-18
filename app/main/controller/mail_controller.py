@@ -85,7 +85,7 @@ class SearchForMailTemplates(Resource):
     def post(self):
         """search for tasks by id, partial_name, create_time, modify_time, status, mail_server_name, catcher_name"""
         data = request.json
-        return search_for__mail_templates(data)
+        return search_for_mail_templates(data)
 
 @ns.route('/template/action/<operator>')
 @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart|stop|finish, delete etc')
@@ -119,7 +119,6 @@ class PatchAMailTemplate(Resource):
             return operate_a_mail_template(id, operator)
 
 @ns.route('/sendmail/<id>')
-# @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart|stop|finish, delete etc')
 @ns.param('id', 'The Task identifier')
 @ns.response(404, 'Task not found.')
 class SendMailofTask(Resource):

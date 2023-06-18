@@ -67,17 +67,17 @@ def search_for_tasks(data):
     except:
         print("没有在这个时间区间修改的任务哦")
 
-    # try:
-    #     if data['manager_name']:
-    #         tmp_tasks = tmp_tasks.filter_by(Task.task_manager.like("%" + data['manager_name'] + "%"))
-    # except:
-    #     print("没有是这个项目经理的任务哦")
-    #
-    # try:
-    #     if data['org_name']:
-    #         tmp_tasks = tmp_tasks.filter_by(Task.org_name.like("%" + data['org_name'] + "%"))
-    # except:
-    #     print("没有是这个机构名称的任务哦")
+    try:
+        if data['manager_name']:
+            tmp_tasks = tmp_tasks.filter_by(Task.task_manager.like("%" + data['manager_name'] + "%"))
+    except:
+        print("没有是这个项目经理的任务哦")
+
+    try:
+        if data['org_name']:
+            tmp_tasks = tmp_tasks.filter_by(Task.org_name.like("%" + data['org_name'] + "%"))
+    except:
+        print("没有是这个机构名称的任务哦")
 
     try:
         if data['isfrozen']:
@@ -129,18 +129,22 @@ def operate_a_task(id, operator):
             db.session.delete(tmp_task)
         elif operator == "freeze":
             tmp_task.isfrozen = True
+            tmp_task.status = 'freeze'
             tmp_task.freezetime = datetime.now()
             tmp_task.frozenbyuid = get_jwt_identity()
         elif operator == "unfreeze":
             tmp_task.isfrozen = False
+            tmp_task.status = 'running'
             tmp_task.freezetime = None
             tmp_task.frozenbyuid = None
         elif operator == "pause":
             tmp_task.ispaused = True
+            tmp_task.status = 'pause'
             tmp_task.pausetime = datetime.now()
             tmp_task.pausebyuid = get_jwt_identity()
         elif operator == "restart":
             tmp_task.ispaused = False
+            tmp_task.status = 'running'
             tmp_task.pausetime = datetime.now()
             tmp_task.pausebyuid = get_jwt_identity()
         else:

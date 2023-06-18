@@ -3,7 +3,7 @@ from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from app.main.service.user_service import save_new_user, get_a_user, get_all_users, get_users_by_org_id, \
-    operate_a_user, search_for_user, update_a_user
+    operate_a_user, search_for_user, update_a_user, delete_users
 from typing import Dict, Tuple
 from ..util.response_tip import *
 
@@ -25,7 +25,7 @@ class UserList(Resource):
         """List all registered users"""
         return get_all_users()
 
-    @jwt_required()
+    # @jwt_required()
     @ns.expect(_user_In, validate=True)
     @ns.response(201, 'User successfully created.')
     @ns.doc('create a new user')
@@ -34,16 +34,12 @@ class UserList(Resource):
         data = request.json
         return save_new_user(data=data)
 
-    @ns.doc('delete users')
+    @ns.doc('delete all users')
     @jwt_required()
-    @ns.expect(_user_IDs_In, validate=True)
+    @ns.response(201, 'Users deleted!')
     def delete(self):
-        """WARNING! Deleting users will leading to the children tests stopped and relative data deleted!"""
-        # 有bug，跑不了
-        userIDs = request.json
-        for id in userIDs['id']:
-            operate_a_user(id, "delete")
-        return response_with(SUCCESS_201)
+        """Delete all users"""
+        return delete_users()
 
 # 直接通过id查询
 @ns.route('/<id>')

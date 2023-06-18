@@ -6,6 +6,8 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from app.main.util.write_json_to_obj import wj2o
 from datetime import datetime
 from app.main.util.response_tip import *
+from flask_mail import Mail, Message
+import json
 
 
 @jwt_required()
@@ -156,3 +158,21 @@ def operate_a_task(id, operator):
 def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
+
+# def send_mails_of_task(id):
+#     mail = Mail()
+#     tem_task = Task.query.filter_by(id=id).first()
+#     target_id_list = json.loads(tem_task.target_id_list)
+#     for uid in target_id_list:
+#         tem_user = User.query.filter_by(id=uid).first()
+#         reci = tem_user.email
+#         msg = Message("qqHello "+str(uid), recipients=[reci])
+#         msg.body = "Hello Flask message sent from Flask-Mail"
+#         mail.send(msg)
+#
+#     response_object = {
+#         'code': 'success',
+#         'message': 'success'
+#     }
+#     return response_object, 201
+

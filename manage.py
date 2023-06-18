@@ -25,7 +25,7 @@ def apply_caching(response):
 
 @app.cli.command("run")
 def run():
-    app.run(host="0.0.0.0")
+    app.run(host="127.0.0.1")
 
 
 @app.cli.command("test")
@@ -48,10 +48,12 @@ def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
 
 @app.route("/init_db")
 def create():
-    db.drop_all()
+    # db.drop_all()
     db.create_all()
     return "db inited"
 
 
 if __name__ == '__main__':
+
     app.run(host='0.0.0.0', port=5000)
+

@@ -34,6 +34,16 @@ class UserList(Resource):
         data = request.json
         return save_new_user(data=data)
 
+    @ns.doc('delete users')
+    @jwt_required()
+    @ns.expect(_user_IDs_In, validate=True)
+    def delete(self):
+        """WARNING! Deleting users will leading to the children tests stopped and relative data deleted!"""
+        # 有bug，跑不了
+        userIDs = request.json
+        for id in userIDs['id']:
+            operate_a_user(id, "delete")
+        return response_with(SUCCESS_201)
 
 # 直接通过id查询
 @ns.route('/<id>')
@@ -93,6 +103,7 @@ class PatchUser(Resource):
 
 
 @ns.route('/search')
+@ns.response(404, 'User not found.')
 class SearchForUsers(Resource):
     """user view"""
     @ns.doc('search_users')
@@ -115,6 +126,6 @@ class User(Resource):
         """get a user given its identifier"""
         users, http_code = get_users_by_org_id(id)
         if not users:
-            return response_with(INVALID_INPUT_422)
+            ns.abort(404)
         else:
-            return users, 201
+            return users, 200

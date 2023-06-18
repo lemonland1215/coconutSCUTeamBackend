@@ -130,9 +130,10 @@ class Project_DTO:
         'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
         'orgid': fields.Integer(required=False, description='orgid'),
         'customer_contact': fields.String(required=False, description='客户对接人'),
-        'customer_email': fields.String(required=False, description='客户联系邮箱'),
+        'contact_email': fields.String(required=False, description='客户联系邮箱'),
         'liaison_id': fields.Integer(required=False, description='联系人id'),
-        'comment': fields.String(required=False, description='comment')
+        'comment': fields.String(required=False, description='comment'),
+        # 'status': fields.String(required=True, description='status')
     }, strict=True)
 
     project_Out = ns.model('project_Out', {
@@ -140,19 +141,20 @@ class Project_DTO:
         'projectname': fields.String(),
         'project_manager': fields.String(),
         'customer_contact': fields.String(),
-        'customer_email': fields.String(),
+        'contact_email': fields.String(),
         'liaison_name': fields.String(),
         'liaison_email': fields.String(),
         'test_number': fields.Integer(),
         'is_frozen': fields.String(),
-        'comment': fields.String()
+        'comment': fields.String(),
+        'status': fields.String()
     })
 
     updateIn = ns.model('project_Update', {
         'projectname': fields.String(required=False, description='name'),
         'project_manager_id': fields.String(required=False, description='project_manager_id'),
         'customer_contact': fields.String(required=False, description='客户对接人'),
-        'customer_email': fields.String(required=False, description='客户联系邮箱'),
+        'contact_email': fields.String(required=False, description='客户联系邮箱'),
         'liaison_id': fields.String(required=False, description='liaison_id'),
         'comment': fields.String(required=False, description='sysrole')
     })

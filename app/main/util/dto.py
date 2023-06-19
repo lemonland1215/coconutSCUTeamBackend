@@ -291,16 +291,21 @@ class Event_DTO:
     phishing_eventIDsIn = ns.model('phishing_eventIDsIn', IDs_In)
 
     phishing_event_in = ns.model('phishing_event_in', {
-        'id': fields.Integer(required=True, default=1, description='中招记录的id'),
+        'id': fields.Integer(required=True, description='中招事件编号'),
+        'type': fields.String(required=True, description='中招事件类型'),
+        # 'time': fields.DateTime(required=True, description='中招时间'),
+        'user_input': fields.String(required=True, description='用户输入内容'),
+        'uid': fields.String(required=True, description='中招人员id'),
+        'task_id': fields.Integer(required=True, description='中招任务id'),
+        'catcher_id': fields.Integer(description='捕获用服务器id'),
+        'server_id': fields.Integer(description='发送方服务器id'),
     })
 
     phishing_event_out = ns.model('phishing_event_out', {
         'id': fields.Integer(description='中招事件编号'),
         'type': fields.String(required=True, description='中招事件类型'),
-        'time': fields.DateTime(required=True, description='中招时间'),
         'user_input': fields.String(required=True, description='用户输入内容'),
         'uid': fields.String(required=True, description='中招人员id'),
-        'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
         'server_id': fields.Integer(description='发送方服务器id'),

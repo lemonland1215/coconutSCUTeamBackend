@@ -26,6 +26,13 @@ class Phishingevents(Resource):
         """展示所有的中招记录（👈）"""
         return get_all_events()
 
+    @ns.expect(_PhishingEventIn, validate=True)
+    @ns.response(201, 'Event successfully created.')
+    @ns.doc('create a new phishing event')
+    def post(self) -> Tuple[Dict[str, str], int]:
+        """Creates a new Event """
+        data = request.json
+        return save_new_event(data=data)
 
 
 @ns.route('/<id>')

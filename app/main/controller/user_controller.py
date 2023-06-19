@@ -34,6 +34,7 @@ class UserList(Resource):
         data = request.json
         return save_new_user(data=data)
 
+
     @ns.doc('delete all users')
     @jwt_required()
     @ns.response(201, 'Users deleted!')

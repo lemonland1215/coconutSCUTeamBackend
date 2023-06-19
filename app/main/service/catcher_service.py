@@ -24,7 +24,6 @@ def save_new_catcher(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     if not catcher:
         new_catcher = Servercatcher()
         data = request.json
-        data['createdbyuid'] = get_jwt_identity()
         print("ok here")
         wj2o(new_catcher, data)
         save_changes(new_catcher)

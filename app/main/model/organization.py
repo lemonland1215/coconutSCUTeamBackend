@@ -15,10 +15,24 @@ class Organization(db.Model):
     createdbyuid = db.Column(db.INTEGER, nullable=False, comment='创建人编号')
     createtime = db.Column(db.DateTime, nullable=False, default=datetime.now(), comment='创建时间')
     freezetime = db.Column(db.DateTime, comment='冻结时间')
-    frozenbyuid = db.Column(db.INTEGER, nullable=False, comment='发起冻结的人编号')
+    frozenbyuid = db.Column(db.INTEGER, comment='发起冻结的人编号')
     logopath = db.Column(db.String(255), comment='logo路径')
     comments = db.Column(db.String(5120), comment='备注')
     modifiedbyuid = db.Column(db.INTEGER, comment='发起修改的用户编号')
     modifytime = db.Column(db.DateTime, comment='修改时间')
     clientcontact = db.Column(db.String(16), nullable=False, comment='客户对接人')
+
+    @staticmethod
+    def init_db():
+        org = Organization()
+        org.name = '猫猫缝补公司'
+        org.istoporg = 1
+        org.higherorgid = 0
+        org.islocked = 0
+        org.isfrozen = 0
+        org.createdbyuid = 1
+        org.clientcontact = '喵喵喵'
+
+        db.session.add(org)
+        db.session.commit()
 

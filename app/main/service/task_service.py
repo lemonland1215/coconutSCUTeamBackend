@@ -3,6 +3,9 @@ from app.main import db, scheduler
 from app.main.model.task import Task
 from app.main.model.user import User
 from app.main.model.project import Project
+from app.main.model.server_catcher import Servercatcher
+from app.main.model.server_sender import Serversender
+from app.main.model.mail_template import Mailtemplate
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
@@ -15,16 +18,60 @@ import json
 
 running_jobs = {}
 
+# @jwt_required()
+# def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
+#     task = Task.query.filter_by(name=data['name']).first()
+#     if not task:
+#         new_task = Task()
+#         data = request.json
+#         data['createdbyuid'] = get_jwt_identity()
+#         wj2o(new_task, data)
+#         save_changes(new_task)
+#         return response_with(SUCCESS_201)
+#     else:
+#         response_object = {
+#             'status': 'fail',
+#             'message': 'Task already exists.',
+#         }
+#         return response_object, 409
 @jwt_required()
 def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     task = Task.query.filter_by(name=data['name']).first()
+    project_exist = Project.query.filter(Project.id == data['project_id']).first()
+    mail_exist = Mailtemplate.query.filter(Mailtemplate.id == data['mail_id']).first()
+    catcher_exist = Servercatcher.query.filter(Servercatcher.id == data['catcher_id']).first()
+    mail_server_exist = Serversender.query.filter(Serversender.id == data['mail_server_id']).first()
     if not task:
-        new_task = Task()
-        data = request.json
-        data['createdbyuid'] = get_jwt_identity()
-        wj2o(new_task, data)
-        save_changes(new_task)
-        return response_with(SUCCESS_201)
+        if project_exist:
+            if mail_exist:
+                if catcher_exist:
+                    if mail_server_exist:
+                        new_task = Task()
+                        data = request.json
+                        data['createdbyuid'] = get_jwt_identity()
+                        wj2o(new_task, data)
+                        save_changes(new_task)
+                        return response_with(SUCCESS_201)
+                    else:
+                        return {
+                           "code": "serverNotExist",
+                           "message": "no such mail server, sorry you can't add."
+                        }, 404
+                else:
+                    return {
+                        "code": "catcherNotExist",
+                        "message": "no such catcher server, sorry you can't add."
+                    }, 404
+            else:
+                return {
+                    "code": "mailNotExist",
+                    "message": "no such mail, sorry you can't add."
+                }, 404
+        else:
+            return{
+                "code": "projectNotExist",
+                "message": "no such project, sorry you can't add."
+            }, 404
     else:
         response_object = {
             'status': 'fail',
@@ -128,7 +175,7 @@ def search_for_tasks(data):
 
 @jwt_required()
 def update_a_task(id):
-    # 任务状态：Running|Freeze|Pause|Finish|Stop
+    # update task info ,status not included
     tmp_task = Task.query.filter_by(id=id).first()
     if not tmp_task:
         return response_with(ITEM_NOT_EXISTS)
@@ -138,9 +185,7 @@ def update_a_task(id):
     update_val['modifiedbyuid'] = get_jwt_identity()
     update_val['modifytime'] = datetime.now()
     wj2o(tmp_task, update_val)
-    # update_val['islocked'] = tmp_task.islocked
-    # update_val['isfrozen'] = tmp_task.isfrozen
-    # update_val['isstop'] = tmp_task.isstop
+
     save_changes(tmp_task)
     response_object = {
         'code': 'success',
@@ -153,6 +198,7 @@ def operate_a_task(tid, operator):
     tmp_task = Task.query.filter_by(id=tid).first()
     if not tmp_task:
         return response_with(ITEM_NOT_EXISTS)
+
     if tmp_task.islocked:
         if operator != "unlock":
             print("任务已经上锁")
@@ -164,15 +210,30 @@ def operate_a_task(tid, operator):
             tmp_task.islocked = True
         elif operator == "delete":
             db.session.delete(tmp_task)
+            job_id = "task_" + str(tid)
+            try:
+                scheduler.remove_job(job_id)
+                if job_id in running_jobs:
+                    del running_jobs[job_id]
+            except Exception as e:
+                print(e)
+        elif tmp_task.status == 'finish':
+            return {
+                       "code": "itemisFinished",
+                       "message": "the task is finished, please create a new one."
+                   }, 400
         else:
             if operator == "freeze":
-                tmp_task.ispaused = True
-                tmp_task.status = 'frozen'
-                tmp_task.freezetime = datetime.now()
-                tmp_task.frozenbyuid = get_jwt_identity()
-                job_id = "task_" + str(tid)
-                if job_id in running_jobs:
-                    scheduler.pause_job(id=job_id)
+                if tmp_task.status == 'running':
+                    tmp_task.ispaused = True
+                    tmp_task.status = 'frozen'
+                    tmp_task.freezetime = datetime.now()
+                    tmp_task.frozenbyuid = get_jwt_identity()
+                    job_id = "task_" + str(tid)
+                    if job_id in running_jobs:
+                        scheduler.pause_job(id=job_id)
+                    else:
+                        print('task is not running!!!')
                 else:
                     print('task is not running!!!')
             elif operator == "unfreeze":
@@ -197,7 +258,7 @@ def operate_a_task(tid, operator):
                     emlist = get_a_task_emails(tid)
 
                     job_id = "task_"+str(tid)
-                    running_jobs[job_id] = {'email_list': emlist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
+                    running_jobs[job_id] = {'tid': tid, 'email_list': emlist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
                     print(emlist)
                     scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=tmp_task.delivery_freq)
                 else:
@@ -219,24 +280,32 @@ def operate_a_task(tid, operator):
     return response_object, 201
 
 def send_mails(job_id):
-    if job_id in running_jobs:
-        emlist = running_jobs[job_id]['email_list']
-        sendlist = running_jobs[job_id]['sendlist']
-        if len(sendlist) < len(emlist):
-            next_em = [em for em in emlist if em not in sendlist][0]
-            send_mail(next_em, "夏夏")
-            running_jobs[job_id]['sendlist'].append(next_em)
+    with app.app_context():
+        if job_id in running_jobs:
+            emlist = running_jobs[job_id]['email_list']
+            sendlist = running_jobs[job_id]['sendlist']
+            if len(sendlist) < len(emlist):
+                next_em = [em for em in emlist if em not in sendlist][0]
+                send_mail(next_em, "夏夏")
+                running_jobs[job_id]['sendlist'].append(next_em)
+            else:
+                tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
+                tmp_task.status = 'finish'
+                try:
+                    scheduler.remove_job(job_id)
+                    del running_jobs[job_id]
+                except Exception as e:
+                    print(e)
+                db.session.commit()
+                    # operate_a_task(running_jobs[job_id]['tid'], 'finish')
+                # running_jobs[job_id]['sendlist'] = []
+                # next_em = emlist[0]
+                # send_mail(next_em, "夏夏")
+                # running_jobs[job_id]['sendlist'].append(next_em)
+
         else:
-            running_jobs[job_id]['sendlist'] = []
-            next_em = emlist[0]
-            send_mail(next_em, "夏夏")
-            running_jobs[job_id]['sendlist'].append(next_em)
-
-    else:
-        scheduler.remove_job(job_id)
-        print('任务未在进行，可能已结束')
-
-
+            # scheduler.remove_job(job_id)
+            print('任务未在进行，可能已结束或未开始')
 
 
 def save_changes(data: Task) -> None:

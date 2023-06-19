@@ -2,8 +2,15 @@ import os
 import unittest
 from app.main import db, jwt
 from app import api_blueprint
-from app.main.model import organization, user
+from app.main.model.user import User
+from app.main.model.liaison import Liaison
+from app.main.model.mail_template import Mailtemplate
 from app.main.model.auth import TokenBlocklist
+from app.main.model.organization import Organization
+from app.main.model.project import Project
+from app.main.model.task import Task
+from app.main.model.server_catcher import Servercatcher
+from app.main.model.server_sender import Serversender
 from flask import Response
 from extention import app
 
@@ -48,8 +55,16 @@ def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
 
 @app.route("/init_db")
 def create():
-    # db.drop_all()
+    db.drop_all()
     db.create_all()
+    User.init_db()
+    Liaison.init_db()
+    Mailtemplate.init_db()
+    Organization.init_db()
+    Project.init_db()
+    Task.init_db()
+    Servercatcher.init_db()
+    Serversender.init_db()
     return "db inited"
 
 

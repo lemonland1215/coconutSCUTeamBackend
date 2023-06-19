@@ -16,6 +16,7 @@ ns = Task_DTO.ns
 _taskIn = Task_DTO.taskIn
 _taskOut = Task_DTO.taskOut
 _task_Search = Task_DTO.searchIn
+_task_Update = Task_DTO.updateIn
 _taskIDsIn = Task_DTO.taskIDsIn
 
 @ns.route('/')
@@ -59,11 +60,11 @@ class Task(Resource):
         else:
             return operate_a_task(id, "delete")
 
-    @ns.expect(_taskIn, validate=True)
+    @ns.expect(_task_Update, validate=True)
     @ns.response(201, 'Task successfully modified.')
     @ns.doc("update a task's info")
     def put(self, id):
-        """update a task's info, status not included"""
+        """可以修改任务的info，但是状态不能修改喵"""
         return update_a_task(id)
 
     @ns.doc('get a task')
@@ -102,6 +103,7 @@ class PatchTasks(Resource):
         for id in taskIDs['id']:
             operate_a_task(id, operator)
         return response_with(SUCCESS_201)
+
 
 @ns.route('/<id>/action/<operator>')
 @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart , delete etc')

@@ -37,16 +37,19 @@ class User(db.Model):
     def __repr__(self):
         return "<User '{}'>".format(self.username)
 
-    # @staticmethod
-    # def init_db():
-    #     rets = [
-    #         ('SixteenNight', 'A company', 'sysadmin', 'password', )
-    #     ]
-    #     for ret in rets:
-    #         user = User()
-    #         user.user_name = ret[0]
-    #         user.orgid = ret[1]
-    #         user.sysrole = ret[2]
-    #         user.password_hash = hash(ret[3])
-    #         db.session.add(user)
-    #     db.session.commit()
+    @staticmethod
+    def init_db():
+        rets = [
+            ('cyb', '$2b$12$4E8injoY8lWAgFHIjC6uXOpUm4.3DgFgdGJu9676/5fZ8HwEy8obG', 1, 'sysrole', 'cyb', 'can', 1, 0)
+        ]
+        for ret in rets:
+            user = User()
+            user.username = ret[0]
+            user.password_hash = ret[1]
+            user.sysrole = ret[2]
+            user.email = ret[3]
+            user.comment = ret[4]
+            user.is_locked = ret[5]
+            user.is_locked = ret[6]
+            db.session.add(user)
+        db.session.commit()

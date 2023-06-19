@@ -25,3 +25,11 @@ def create_app(config_name: str) -> Flask:
     scheduler.start()
 
     return app
+
+def create_catcher_app():
+    app = Flask(__name__,
+            # static_url_path = 'catcher', # 配置静态文件的访问 url 前缀
+            # static_folder = os.path.join(BASE_DIR, 'static'),    # 配置静态文件的文件夹
+            # template_folder = os.path.join(BASE_DIR, 'templates') # 配置模板文件的文件夹
+            )
+    return app

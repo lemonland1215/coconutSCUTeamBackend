@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, render_template_string
 from app.main import db, scheduler
 from app.main.model.task import Task
 from app.main.model.user import User
@@ -87,14 +87,10 @@ def get_a_task(id):
 def get_all_tasks():
     return Task.query.all(), 201
 
-def get_a_task_emails(id):
-    em_list = []
-    tem_task = Task.query.filter_by(id=id).first()
-    target_id_list = json.loads(tem_task.target_id_list)
-    for uid in target_id_list:
-        tem_user = User.query.filter_by(id=uid).first()
-        em_list.append(tem_user.email)
-    return em_list
+def get_a_task_users(tid):
+    tem_task = Task.query.filter_by(id=tid).first()
+    u_list = json.loads(tem_task.target_id_list)
+    return u_list
 
 def search_for_tasks(data):
     # 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理id、冻结状态
@@ -255,11 +251,12 @@ def operate_a_task(tid, operator):
             elif operator == "begin":
                 if tmp_task.status == 'waiting':
                     tmp_task.status = 'running'
-                    emlist = get_a_task_emails(tid)
+                    tmp_task.delivery_time = datetime.now()
+                    ulist = get_a_task_users(tid)
 
                     job_id = "task_"+str(tid)
-                    running_jobs[job_id] = {'tid': tid, 'email_list': emlist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
-                    print(emlist)
+                    running_jobs[job_id] = {'tid': tid, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
+                    print(ulist)
                     scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=tmp_task.delivery_freq)
                 else:
                     print()
@@ -282,14 +279,24 @@ def operate_a_task(tid, operator):
 def send_mails(job_id):
     with app.app_context():
         if job_id in running_jobs:
-            emlist = running_jobs[job_id]['email_list']
+            ulist = running_jobs[job_id]['u_list']
             sendlist = running_jobs[job_id]['sendlist']
-            if len(sendlist) < len(emlist):
-                next_em = [em for em in emlist if em not in sendlist][0]
-                send_mail(next_em, "夏夏")
-                running_jobs[job_id]['sendlist'].append(next_em)
+            tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
+            if len(sendlist) < len(ulist):
+                mailtempid = tmp_task.mail_id
+                tmp_mtemplate = Mailtemplate.query.filter_by(id=mailtempid).first()
+                subject = tmp_mtemplate.subject
+                content = tmp_mtemplate.content
+                next_uid = [u for u in ulist if u not in sendlist][0]
+                tmp_user = User.query.filter_by(id=next_uid).first()
+                tmp_em = tmp_user.email
+                tmp_name = tmp_user.username
+                user = {'name': tmp_name, 'id': next_uid}
+                content = render_template_string(content, user=user)
+                print(content)
+                send_mail(tmp_em, tmp_name, subject, content)
+                running_jobs[job_id]['sendlist'].append(next_uid)
             else:
-                tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
                 tmp_task.status = 'finish'
                 try:
                     scheduler.remove_job(job_id)
@@ -312,11 +319,11 @@ def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
 
-def send_mail(to_addr, name):
+def send_mail(to_addr, name, subject, context):
     mail = Mail()
     with app.app_context():
-        msg = Message("qqHello " + name, recipients=[to_addr])
-        msg.body = "Hello Flask message sent from Flask-Mail"
+        msg = Message("qqHello " + name +subject, recipients=[to_addr])
+        msg.html = context
         mail.send(msg)
 
 
@@ -336,4 +343,6 @@ def send_mail(to_addr, name):
 #         'message': 'success'
 #     }
 #     return response_object, 201
+
+
 

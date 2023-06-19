@@ -98,7 +98,7 @@ class PatchTasks(Resource):
     @ns.doc('operate tasks')
     @ns.expect(_taskIDsIn, validate=True)
     def patch(self, operator):
-        """modify the status of a serise of tasks"""
+        """modify the status of a series of tasks"""
         taskIDs = request.json
         for id in taskIDs['id']:
             operate_a_task(id, operator)

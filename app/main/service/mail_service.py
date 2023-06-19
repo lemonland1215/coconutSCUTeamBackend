@@ -20,7 +20,7 @@ def get_a_mail_template(id):
 
 @jwt_required()
 def save_new_mail_template(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
-    template = Mailtemplate.query.filter_by(name=data['name']).first()
+    template = Mailtemplate.query.filter_by(subject=data['subject']).first()
     if not template:
         new_template = Mailtemplate()
         data = request.json

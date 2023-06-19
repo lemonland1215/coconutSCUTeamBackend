@@ -6,6 +6,10 @@ from app.main.model.user import User
 from app.main.model.liaison import Liaison
 from app.main.model.mail_template import Mailtemplate
 from app.main.model.auth import TokenBlocklist
+from flask import Response, render_template
+from flask.cli import FlaskGroup
+from extention import app, app_catcher
+
 from app.main.model.organization import Organization
 from app.main.model.project import Project
 from app.main.model.task import Task
@@ -13,14 +17,15 @@ from app.main.model.server_catcher import Servercatcher
 from app.main.model.server_sender import Serversender
 from app.main.model.log import Log
 from app.main.model.phishing_event import Phishingevent
-from flask import Response
-from extention import app
+
 
 
 app.register_blueprint(api_blueprint)
-
 app.app_context().push()
 
+cli = FlaskGroup('phishingtest')
+cli.add_command("run", app)
+cli.add_command("run_catcher", app_catcher)
 
 
 @app.after_request
@@ -32,19 +37,16 @@ def apply_caching(response):
     return response
 
 
+
+
+@app_catcher.cli.command("run_catcher")
+def run_catcher():
+    app_catcher.run(host='0.0.0.0', port=6000)
+
 @app.cli.command("run")
 def run():
     app.run(host="127.0.0.1")
 
-
-@app.cli.command("test")
-def test():
-    """Runs the unit tests."""
-    tests = unittest.TestLoader().discover('app/test', pattern='test*.py')
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
-    if result.wasSuccessful():
-        return 0
-    return 1
 
 
 @jwt.token_in_blocklist_loader
@@ -69,8 +71,16 @@ def create():
     Serversender.init_db()
     return "db inited"
 
+@app_catcher.route("/")
+def index():
+    return render_template("dy.html")
+
 
 if __name__ == '__main__':
+    # cli()
+#     cli = FlaskGroup(app_catcher)
+#     print(cli.commands)
 
     app.run(host='0.0.0.0', port=5000)
+    # app_catcher.run(host='0.0.0.0', port=6000)
 

@@ -114,11 +114,11 @@ class Auth:
         else:
             auth_token = ''
         if auth_token:
-            resp = User.decode_auth_token(auth_token)
-            print("resp:",resp)
+            # resp = User.decode_auth_token(auth_token)
+            print("resp:",auth_token)
             # if isinstance(resp, str):
                 # mark the token as blacklisted
-            return save_token(resp)
+            return save_token(auth_token)
             # else:
             #     response_object = {
             #         'status': 'fail',

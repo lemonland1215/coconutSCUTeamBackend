@@ -11,6 +11,7 @@ from app.main.model.project import Project
 from app.main.model.task import Task
 from app.main.model.server_catcher import Servercatcher
 from app.main.model.server_sender import Serversender
+from app.main.model.phishing_event import Phishingevent
 from flask import Response
 from extention import app
 

@@ -288,7 +288,7 @@ class Event_DTO:
         'id': fields.Integer(reqired=True, default=1, description='中招记录的id'),
     })
 
-    html_template_out = ns.model('html_template_out', {
+    phishing_event_out = ns.model('phishing_event_out', {
         'id': fields.Integer(description='中招事件编号'),
         'type': fields.String(reqired=True, description='中招事件类型'),
         'time': fields.DateTime(reqired=True, description='中招时间'),
@@ -300,12 +300,59 @@ class Event_DTO:
         'server_id': fields.Integer(description='发送方服务器id'),
     })
 
-    searchIn = ns.model('event_Search', {
+    searchIn = ns.model('searchIn', {
         'uid': fields.String(reqired=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
         'server_id': fields.Integer(description='发送方服务器id'),
+    })
+
+class Sender_DTO:
+    ns = Namespace('t_server_sender', description='server sender event related operations')
+
+    sender_eventIDsIn = ns.model('sender_eventIDsIn', IDs_In)
+
+    sender_in = ns.model('sender_in', {
+        'name': fields.Integer(reqired=True, default='name', description='sender name'),
+        'server': fields.String(reqired=True,description='sender IP'),
+        'port': fields.Integer(reqired=True,description='sender port'),
+        'encryptalg': fields.String(reqired=True,description='加密算法'),
+        'password': fields.String(reqired=True,description='密码'),
+        'isfrozen': fields.Boolean(description='冻没',default=0),
+        'islocked': fields.Boolean(description='锁没',default=0),
+    })
+
+    sender_out = ns.model('sender_out', {
+        'name': fields.String(reqired=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'encryptalg': fields.String(description='加密算法'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'freezetime': fields.DateTime(description='冻结时间'),
+        'islocked': fields.Boolean(description='锁没'),
+        'locktime': fields.DateTime(description='锁定时间'),
+        'createdbyuid': fields.Integer(description='创建者id'),
+        'createtime':fields.DateTime(description='创建时间'),
+        'modifiedbyuid': fields.Integer(description='修改者id'),
+        'modifytime': fields.DateTime(description='修改时间')
+    })
+
+    sender_search = ns.model('sender_search', {
+        'name': fields.String(reqired=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'encryptalg': fields.String(description='加密算法'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'islocked': fields.Boolean(description='锁没')
+    })
+
+    sender_update = ns.model('sender_update', {
+        'name': fields.String(reqired=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'encryptalg': fields.String(description='加密算法'),
+        'password': fields.String(description='密码')
     })
 
 class File_DTO:

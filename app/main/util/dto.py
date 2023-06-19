@@ -184,9 +184,9 @@ class Task_DTO:
         'project_id': fields.Integer(required=True, description='project id'),
         'type': fields.String(required=True, description='task type'),
         'mail_id': fields.Integer(required=True, description='mail template id'),
-        'status': fields.String(required=True, default='running', descripition='task status'),
+        'status': fields.String(required=True, default='waiting', descripition='task status'),
         'catcher_id': fields.Integer(required=True, descripition='cather server id'),
-        'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
+        # 'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
         'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),
         # 'project_manager': fields.String(required=True, description='task manager name(yifang)'),
         'target_num': fields.Integer(required=False, descripition='target num'),
@@ -196,7 +196,7 @@ class Task_DTO:
         'delivery_address': fields.String(required=True, description='the address of the delivery, like:deliver@mail'),
         'delivery_freq': fields.Integer(required=True, description='the frequency of the sending mails'),
         'mail_server_id': fields.Integer(required=True, description='server id'),
-        'mail_server_name': fields.String(required='True', description='server name'),
+        # 'mail_server_name': fields.String(required='True', description='server name'),
         'islocked': fields.Boolean(required=True, default=False, description='can task be modified'),
         'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
         'ispaused': fields.Boolean(required=False, default=False, description='is this task still running'),
@@ -209,7 +209,7 @@ class Task_DTO:
         'name': fields.String(description='task name'),
         'project_id': fields.String(description='top project id'),
         'type': fields.String(description='mail type'),
-        'catcher_name': fields.String(description='catcher server name'),
+        # 'catcher_name': fields.String(description='catcher server name'),
         'report_status': fields.Boolean(required=True, default=False, description='dose report be generated'),
         'delivery_address': fields.String(description='delivery address'),
         'delivery_freq': fields.Integer(required=True, description='the frequency mail send'),
@@ -233,6 +233,16 @@ class Task_DTO:
         'project_id': fields.Integer(required=False, description='project_id'),
         'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
         'is_frozen': fields.String(required=False, description='is_frozen')
+    })
+
+    updateIn = ns.model('task_Update',{
+        'name': fields.String(description='name'),
+        'type': fields.String(description='mail type'),
+        'project_id': fields.Integer(description='父项目id'),
+        'catcher_id': fields.Integer(description='捕获服务器id'),
+        'mail_server_id': fields.Integer(description='邮件服务器id'),
+        'delivery_freq': fields.Integer(description='发件频率'),
+        'target_id_list': fields.String(description='目标人员list')
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
@@ -282,6 +292,7 @@ class Event_DTO:
         'id': fields.Integer(description='中招事件编号'),
         'type': fields.String(reqired=True, description='中招事件类型'),
         'time': fields.DateTime(reqired=True, description='中招时间'),
+        'user_input': fields.String(reqired=True, description='用户输入内容'),
         'uid': fields.String(reqired=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
@@ -290,8 +301,6 @@ class Event_DTO:
     })
 
     searchIn = ns.model('event_Search', {
-        # 'type': fields.String(reqired=True, description='中招事件类型'),
-        # 'time': fields.DateTime(reqired=True, description='中招时间'),
         'uid': fields.String(reqired=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),

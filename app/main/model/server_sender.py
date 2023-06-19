@@ -17,9 +17,24 @@ class Serversender(db.Model):
     createdbyuid = db.Column(db.INTEGER, nullable=False, comment='创建人编号')
     createtime = db.Column(db.DateTime, nullable=False, default=datetime.now(), comment='创建时间')
     freezetime = db.Column(db.DateTime, comment='冻结时间')
-    frozenbyuid = db.Column(db.INTEGER, nullable=False, comment='发起冻结的人编号')
+    frozenbyuid = db.Column(db.INTEGER, comment='发起冻结的人编号')
     modifiedbyuid = db.Column(db.INTEGER, comment='发起修改的用户编号')
     modifytime = db.Column(db.DateTime, comment='修改时间')
     comments = db.Column(db.String(5120), comment='备注')
-    lockbyuid = db.Column(db.INTEGER, nullable=False, comment='发起锁定的人编号')
-    locktime = db.Column(db.DateTime, nullable=False, comment='锁定时间')
+    lockbyuid = db.Column(db.INTEGER,comment='发起锁定的人编号')
+    locktime = db.Column(db.DateTime, comment='锁定时间')
+
+    @staticmethod
+    def init_db():
+        sender = Serversender()
+        sender.name = 'xiancaoro'
+        sender.server = '127.0.0.1'
+        sender.port = 50
+        sender.encryptalg = 'AES'
+        sender.password = 'kkkkk'
+        sender.islocked = 0
+        sender.isfrozen = 0
+        sender.createdbyuid = 1
+
+        db.session.add(sender)
+        db.session.commit()

@@ -11,7 +11,6 @@ class Project(db.Model):
     project_manager_id = db.Column(db.INTEGER, nullable=False, comment='项目管理员id')
     project_creator_id = db.Column(db.INTEGER, nullable=False, comment='项目创建人id')
     orgid = db.Column(db.INTEGER, nullable=False, comment='客户公司id')
-    # orgname = db.Column(db.String(100), nullable=False, comment='客户公司名称')
     customer_contact = db.Column(db.String(50), nullable=True, comment='客户对接人')
     contact_email = db.Column(db.String(100), nullable=True, comment='对接人邮箱')
     liaison_id = db.Column(db.INTEGER, nullable=False, comment='项目联系人编号')
@@ -27,3 +26,20 @@ class Project(db.Model):
     status = db.Column(db.String(50), nullable=False, default='Running', comment='项目进展状态：Running|Stop|Pause|Finish')
     create_time = db.Column(db.DateTime, default=datetime.now(), nullable=False, comment='创建时间')
     end_time = db.Column(db.DateTime, nullable=True, comment='结束时间')
+
+
+    @staticmethod
+    def init_db():
+        project = Project()
+        project.projectname = 'stafelring'
+        project.project_manager_id = 15
+        project.project_creator_id = 1
+        project.orgid = 2
+        project.customer_contact = 'stdlring'
+        project.contact_email = 'mail@mail'
+        project.liaison_id = 1
+        project.is_locked = 0
+        project.is_frozen = 0
+        project.status = 'Running'
+        db.session.add(project)
+        db.session.commit()

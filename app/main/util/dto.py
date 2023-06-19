@@ -260,9 +260,9 @@ class Mail_DTO:
     html_templateIDsIn = ns.model('html_templateIDsIn', IDs_In)
 
     html_template_in = ns.model('html_template_in', {
-        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
-        'subject': fields.String(reqired=True, default="1", description='邮件主题'),
-        'content': fields.String(reqired=True, default="内容", description='邮件内容'),
+        'type': fields.String(required=True, default="text", description='模板类型：如文本/html、二进制、office等'),
+        'subject': fields.String(required=True, default="1", description='邮件主题'),
+        'content': fields.String(required=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
         'comments': fields.String(description='备注'),
@@ -270,9 +270,9 @@ class Mail_DTO:
 
     html_template_out = ns.model('html_template_out', {
         'id': fields.Integer(description='html template id'),
-        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
-        'subject': fields.String(reqired=True, default="1", description='邮件主题'),
-        'content': fields.String(reqired=True, default="内容", description='邮件内容'),
+        'type': fields.String(required=True, default="text", description='模板类型：如文本/html、二进制、office等'),
+        'subject': fields.String(required=True, default="1", description='邮件主题'),
+        'content': fields.String(required=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
         'comments': fields.String(description='备注'),
@@ -286,20 +286,20 @@ class Mail_DTO:
 
 
 class Event_DTO:
-    ns = Namespace('t_phishing_event', description='phishing event related operations')
+    ns = Namespace('phishing_event', description='phishing event related operations')
 
     phishing_eventIDsIn = ns.model('phishing_eventIDsIn', IDs_In)
 
     phishing_event_in = ns.model('phishing_event_in', {
-        'id': fields.Integer(reqired=True, default=1, description='中招记录的id'),
+        'id': fields.Integer(required=True, default=1, description='中招记录的id'),
     })
 
     phishing_event_out = ns.model('phishing_event_out', {
         'id': fields.Integer(description='中招事件编号'),
-        'type': fields.String(reqired=True, description='中招事件类型'),
-        'time': fields.DateTime(reqired=True, description='中招时间'),
-        'user_input': fields.String(reqired=True, description='用户输入内容'),
-        'uid': fields.String(reqired=True, description='中招人员id'),
+        'type': fields.String(required=True, description='中招事件类型'),
+        'time': fields.DateTime(required=True, description='中招时间'),
+        'user_input': fields.String(required=True, description='用户输入内容'),
+        'uid': fields.String(required=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
@@ -307,7 +307,7 @@ class Event_DTO:
     })
 
     searchIn = ns.model('searchIn', {
-        'uid': fields.String(reqired=True, description='中招人员id'),
+        'uid': fields.String(required=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
@@ -315,22 +315,23 @@ class Event_DTO:
     })
 
 class Sender_DTO:
-    ns = Namespace('t_server_sender', description='server sender event related operations')
+    ns = Namespace('server_sender', description='server sender event related operations')
 
     sender_eventIDsIn = ns.model('sender_eventIDsIn', IDs_In)
 
     sender_in = ns.model('sender_in', {
-        'name': fields.Integer(reqired=True, default='name', description='sender name'),
-        'server': fields.String(reqired=True,description='sender IP'),
-        'port': fields.Integer(reqired=True,description='sender port'),
-        'encryptalg': fields.String(reqired=True,description='加密算法'),
-        'password': fields.String(reqired=True,description='密码'),
-        'isfrozen': fields.Boolean(description='冻没',default=0),
-        'islocked': fields.Boolean(description='锁没',default=0),
+        'name': fields.String(required=True, default='name', description='sender name'),
+        'server': fields.String(required=True, description='sender IP'),
+        'port': fields.Integer(required=True, description='sender port'),
+        'encryptalg': fields.String(required=True, description='加密算法'),
+        'password': fields.String(required=True, description='密码'),
+        'isfrozen': fields.Boolean(required=False, default=False, description='冻没'),
+        'islocked': fields.Boolean(required=False, default=False, description='锁没'),
+        'comments': fields.String(description='备注'),
     })
 
     sender_out = ns.model('sender_out', {
-        'name': fields.String(reqired=True, description='sender name'),
+        'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
         'encryptalg': fields.String(description='加密算法'),
@@ -345,7 +346,7 @@ class Sender_DTO:
     })
 
     sender_search = ns.model('sender_search', {
-        'name': fields.String(reqired=True, description='sender name'),
+        'name': fields.String(description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
         'encryptalg': fields.String(description='加密算法'),
@@ -354,7 +355,7 @@ class Sender_DTO:
     })
 
     sender_update = ns.model('sender_update', {
-        'name': fields.String(reqired=True, description='sender name'),
+        'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
         'encryptalg': fields.String(description='加密算法'),

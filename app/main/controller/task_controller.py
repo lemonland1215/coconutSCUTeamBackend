@@ -26,21 +26,21 @@ class Tasks(Resource):
     @ns.marshal_list_with(_taskOut, envelope='children')
     # @jwt_required
     def get(self):
-        """List all tasks"""
+        """展示所有任务喵＞︿＜"""
         return get_all_tasks()
 
     @ns.expect(_taskIn, validate=True)
     @ns.response(201, 'Task successfully created.')
     @ns.doc('create a new task')
     def post(self) -> Tuple[Dict[str, str], int]:
-        """Creates a new Task """
+        """新建任务喵＞︿＜"""
         data = request.json
         return save_new_task(data=data)
 
     @ns.doc('delete tasks')
     @ns.expect(_taskIDsIn, validate=True)
     def delete(self):
-        """Delete Tasks"""
+        """可以删除多个任务喵（＞人＜；）"""
         taskIDs = request.json
         for id in taskIDs['id']:
             operate_a_task(id, "delete")
@@ -52,7 +52,7 @@ class Tasks(Resource):
 class Task(Resource):
     @ns.doc('delete a task')
     def delete(self, id):
-        """fxxking delete a task"""
+        """删除任务喵（＞人＜；）"""
         task, resp_status_code = get_a_task(id)
         if not task:
             ns.abort(404)
@@ -84,12 +84,12 @@ class SearchForTasks(Resource):
     @ns.marshal_list_with(_taskOut, envelope='children')
     @ns.expect(_task_Search, validate=True)
     def post(self):
-        """search for tasks by 编号、名称、创建日期、修改日期、机构名称、项目经理、冻结状态 (注：机构name&项目经理暂时注释了)"""
+        """search for tasks by 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理"""
         data = request.json
         return search_for_tasks(data)
 
 @ns.route('/action/<operator>')
-@ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart|stop|finish, delete etc')
+@ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart, delete etc')
 @ns.response(404, 'Task not found.')
 class PatchTasks(Resource):
     """task view"""
@@ -97,22 +97,21 @@ class PatchTasks(Resource):
     @ns.doc('operate tasks')
     @ns.expect(_taskIDsIn, validate=True)
     def patch(self, operator):
-        """modify the status of a task"""
+        """modify the status of a serise of tasks"""
         taskIDs = request.json
-        for id in taskIDs['data']:
+        for id in taskIDs['id']:
             operate_a_task(id, operator)
         return response_with(SUCCESS_201)
 
 @ns.route('/<id>/action/<operator>')
-@ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart|stop|finish, delete etc')
+@ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart , delete etc')
 @ns.param('id', 'The Task identifier')
 @ns.response(404, 'Task not found.')
 class PatchATask(Resource):
     """task view"""
-
     @ns.doc('modify a task status')
     def patch(self, id, operator):
-        """modify the status of organizations, status enum: lock|unlock"""
+        """modify the status of a task, status enum: lock|unlock"""
         task, http_code = get_a_task(id)
         if not task:
             ns.abort(404)

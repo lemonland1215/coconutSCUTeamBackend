@@ -192,7 +192,7 @@ class Task_DTO:
         'target_num': fields.Integer(required=False, descripition='target num'),
         'target_id_list': fields.String(required=True, description='target list'),
         'delivery_name': fields.String(required=True, description='the name of the person that deliver the mail'),
-        # 'delivery_time': CustomDate(required=False, default=datetime(2023, 6, 20, 0, 0, 0, 361636), description='发件时间'),
+        # 'delivery_time': fields.DateTime(required=False, description='发件时间'),
         'delivery_address': fields.String(required=True, description='the address of the delivery, like:deliver@mail'),
         'delivery_freq': fields.Integer(required=True, description='the frequency of the sending mails'),
         'mail_server_id': fields.Integer(required=True, description='server id'),
@@ -229,8 +229,9 @@ class Task_DTO:
         'name': fields.String(required=False, description='name'),
         'createtime': fields.DateTime(required=False, description='create_time'),
         'modifytime': fields.DateTime(required=False, description='modified_time'),
-        # 'manager_name': fields.String(required=False, description='manager_name'),
-        # 'org_name': fields.String(required=False, description='org_name'),
+        'project_name': fields.String(required=False, description='project_name'),
+        'project_id': fields.Integer(required=False, description='project_id'),
+        'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
         'is_frozen': fields.String(required=False, description='is_frozen')
     })
 

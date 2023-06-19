@@ -67,19 +67,15 @@ class Auth:
     @staticmethod
     def login_user(data: Dict[str, str], session) -> Tuple[Dict[str, str], int]:
         try:
-            print("####################")
-            # pprint(request.cookies)
             pprint(request.json)
-            # pprint(session)
             print("session--verify_code: ",session['verify_code'])
-            print("^^^^^^^^^^^^^^^^^^^^^")
             # print("获取的生成的验证码：", session['verify_code'], ":", "发送来的验证码：", request.json['verify_code'])
             if session['verify_code'] != request.json['verify_code']:
+                Auth.generate_verify_code()
                 response_object = {
                     'status': 'fail',
                     'message': 'verify code error',
                 }
-                Auth.generate_verify_code()
                 return response_object, 403
             # fetch the user data
             user = User.query.filter_by(email=data.get('email')).first()

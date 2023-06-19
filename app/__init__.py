@@ -13,6 +13,7 @@ from .main.controller.sender_controller import ns as sender_ns
 from .main.controller.phishing_event_controller import ns as event_ns
 from .main.controller.catcher_controller import ns as catcher_ns
 
+
 api_blueprint = Blueprint('flask-restx', __name__)
 authorizations = {
     'apikey': {

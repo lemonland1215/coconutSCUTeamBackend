@@ -95,7 +95,7 @@ class User_DTO:
         'username': fields.String(),
         'sysrole': fields.String(),
         'is_frozen': fields.String(),
-        'is_locked': fields.String(),
+        'is_locked': fields.Boolean(),
         'orgid': fields.Integer()
     })
 
@@ -149,7 +149,9 @@ class Project_DTO:
         'is_frozen': fields.String(),
         'comment': fields.String(),
         'status': fields.String(),
-        'create_time': fields.String()
+        'create_time': fields.String(),
+        'modified_time': fields.String(),
+        'is_locked': fields.String()
     })
 
     updateIn = ns.model('project_Update', {
@@ -169,7 +171,7 @@ class Project_DTO:
         'orgname': fields.String(required=False, description='orgname'),
         'orgid': fields.Integer(required=False, description='orgid'),
         'project_manager': fields.String(required=False, description='project_manager'),
-        'is_frozen': fields.String(required=False, description='is_frozen')
+        'is_frozen': fields.Boolean(required=False, description='is_frozen')
     })
 
 class Task_DTO:

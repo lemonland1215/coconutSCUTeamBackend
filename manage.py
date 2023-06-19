@@ -1,17 +1,17 @@
 import os
 import unittest
-from flask_migrate import Migrate
+from app.main import db, jwt
 from app import api_blueprint
-from app.main import create_app, db, jwt
 from app.main.model import organization, user
 from app.main.model.auth import TokenBlocklist
 from flask import Response
+from extention import app
 
-app = create_app(os.getenv('BOILERPLATE_ENV') or 'dev')
+
 app.register_blueprint(api_blueprint)
 
 app.app_context().push()
-migrate = Migrate(app, db)
+
 
 
 @app.after_request

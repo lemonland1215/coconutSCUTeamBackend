@@ -2,6 +2,7 @@ from flask import request
 from app.main import db, scheduler
 from app.main.model.task import Task
 from app.main.model.user import User
+from app.main.model.project import Project
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
@@ -49,8 +50,10 @@ def get_a_task_emails(id):
     return em_list
 
 def search_for_tasks(data):
-    # 编号、名称、创建日期、修改日期、机构名称、项目经理、冻结状态
+    # 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理id、冻结状态
     tmp_tasks = Task.query
+    tmp_projects = Project.query
+
     try:
         if data['id']:
             print(data['id'])
@@ -79,17 +82,38 @@ def search_for_tasks(data):
     except:
         print("没有在这个时间区间修改的任务哦")
 
-    # try:
-    #     if data['manager_name']:
-    #         tmp_tasks = tmp_tasks.filter_by(Task.task_manager.like("%" + data['manager_name'] + "%"))
-    # except:
-    #     print("没有是这个项目经理的任务哦")
-    #
-    # try:
-    #     if data['org_name']:
-    #         tmp_tasks = tmp_tasks.filter_by(Task.org_name.like("%" + data['org_name'] + "%"))
-    # except:
-    #     print("没有是这个机构名称的任务哦")
+    try:
+        if data['project_id']:
+            tmp_tasks = tmp_tasks.filter_by(project_id=data['project_id'])
+    except:
+        print("没有是这个项目id的任务哦")
+
+    try:
+        if data['project_name']:
+            print(data['project_name'])
+            tmp_projects = tmp_projects.filter(Project.projectname.like("%" + data['project_name'] + "%")).all()
+            print("hh")
+            filtered_tasks = []  # 创建空的任务列表
+            for tmp_project in tmp_projects:
+                tmp_id = tmp_project.id
+                tasks_for_project = tmp_tasks.filter_by(project_id=tmp_id).all()  # 获取每个项目的任务
+                filtered_tasks.extend(tasks_for_project)  # 将每个项目的任务添加到任务列表中
+            return filtered_tasks, 201  # 返回过滤后的任务列表
+    except:
+        print("没有是这个项目名称的任务哦")
+
+    try:
+        if data['project_manager_id']:
+            print(data['project_manager_id'])
+            tmp_projects = tmp_projects.filter_by(project_manager_id=data['project_manager_id']).all()
+            filtered_tasks = []  # 创建空的任务列表
+            for tmp_project in tmp_projects:
+                tmp_id = tmp_project.id
+                tasks_for_project = tmp_tasks.filter_by(project_id=tmp_id).all()  # 获取每个项目的任务
+                filtered_tasks.extend(tasks_for_project)  # 将每个项目的任务添加到任务列表中
+            return filtered_tasks, 201  # 返回过滤后的任务列表
+    except:
+        print("没有是这个项目经理的任务哦")
 
     try:
         if data['isfrozen']:
@@ -97,7 +121,8 @@ def search_for_tasks(data):
     except:
         print("没有状态为冻结的任务哦")
 
-    print(tmp_tasks.all())
+    # print(tmp_tasks.all())
+    # print(tmp_projects.all())
     return tmp_tasks.all(), 201
 
 

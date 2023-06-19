@@ -268,5 +268,36 @@ class Mail_DTO:
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
 
+
+class Event_DTO:
+    ns = Namespace('t_phishing_event', description='phishing event related operations')
+
+    phishing_eventIDsIn = ns.model('phishing_eventIDsIn', IDs_In)
+
+    phishing_event_in = ns.model('phishing_event_in', {
+        'id': fields.Integer(reqired=True, default=1, description='中招记录的id'),
+    })
+
+    html_template_out = ns.model('html_template_out', {
+        'id': fields.Integer(description='中招事件编号'),
+        'type': fields.String(reqired=True, description='中招事件类型'),
+        'time': fields.DateTime(reqired=True, description='中招时间'),
+        'uid': fields.String(reqired=True, description='中招人员id'),
+        'uname': fields.String(description='中招人员姓名'),
+        'task_id': fields.Integer(description='中招任务id'),
+        'catcher_id': fields.Integer(description='捕获用服务器id'),
+        'server_id': fields.Integer(description='发送方服务器id'),
+    })
+
+    searchIn = ns.model('event_Search', {
+        # 'type': fields.String(reqired=True, description='中招事件类型'),
+        # 'time': fields.DateTime(reqired=True, description='中招时间'),
+        'uid': fields.String(reqired=True, description='中招人员id'),
+        'uname': fields.String(description='中招人员姓名'),
+        'task_id': fields.Integer(description='中招任务id'),
+        'catcher_id': fields.Integer(description='捕获用服务器id'),
+        'server_id': fields.Integer(description='发送方服务器id'),
+    })
+
 class File_DTO:
     ns = Namespace('upload', description='file and image related operations')

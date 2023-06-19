@@ -17,7 +17,7 @@ _SenderIn = Sender_DTO.sender_in
 _SenderOut = Sender_DTO.sender_out
 _sender_Search = Sender_DTO.sender_search
 _sender_Update = Sender_DTO.sender_update
-_senderIDsIn = Sender_DTO.sender_eventIDsIn
+_senderIDsIn = Sender_DTO.senderIDsIn
 
 @ns.route('/')
 class Serversenders(Resource):
@@ -80,11 +80,11 @@ class Serversender(Resource):
 
 @ns.route('/action/<operator>')
 @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, delete etc')
-@ns.response(404, 'Organization not found.')
+@ns.response(404, 'sender not found.')
 class PatchSenders(Resource):
-    """organization view"""
+    """sender view"""
 
-    @ns.doc('operate organizations')
+    @ns.doc('operate senders')
     @ns.expect(_senderIDsIn, validate=True)
     def patch(self, operator):
         """您可以在这里修改server sender的状态"""
@@ -95,7 +95,7 @@ class PatchSenders(Resource):
 
 @ns.route('/search')
 class SearchForSenders(Resource):
-    """organization view"""
+    """server sender view"""
 
     @ns.doc('search for server senders')
     @ns.marshal_list_with(_SenderOut, envelope='children')

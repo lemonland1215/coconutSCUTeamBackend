@@ -317,7 +317,7 @@ class Event_DTO:
 class Sender_DTO:
     ns = Namespace('server_sender', description='server sender event related operations')
 
-    sender_eventIDsIn = ns.model('sender_eventIDsIn', IDs_In)
+    senderIDsIn = ns.model('senderIDsIn', IDs_In)
 
     sender_in = ns.model('sender_in', {
         'name': fields.String(required=True, default='name', description='sender name'),
@@ -362,6 +362,47 @@ class Sender_DTO:
         'password': fields.String(description='密码')
     })
 
+class Catcher_DTO:
+    ns = Namespace('server_catcher', description='server catcher event related operations')
+
+    catcherIDsIn = ns.model('catcherIDsIn', IDs_In)
+
+    catcher_in = ns.model('catcher_in', {
+        'name': fields.String(required=True, default='name', description='sender name'),
+        'server': fields.String(required=True, description='sender IP'),
+        'port': fields.Integer(required=True, description='sender port'),
+        'isfrozen': fields.Boolean(required=False, default=False, description='冻没'),
+        'islocked': fields.Boolean(required=False, default=False, description='锁没'),
+        'comments': fields.String(description='备注'),
+    })
+
+    catcher_out = ns.model('catcher_out', {
+        'name': fields.String(required=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'freezetime': fields.DateTime(description='冻结时间'),
+        'islocked': fields.Boolean(description='锁没'),
+        'locktime': fields.DateTime(description='锁定时间'),
+        'createdbyuid': fields.Integer(description='创建者id'),
+        'createtime':fields.DateTime(description='创建时间'),
+        'modifiedbyuid': fields.Integer(description='修改者id'),
+        'modifytime': fields.DateTime(description='修改时间')
+    })
+
+    catcher_search = ns.model('catcher_search', {
+        'name': fields.String(description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'islocked': fields.Boolean(description='锁没')
+    })
+
+    catcher_update = ns.model('catcher_update', {
+        'name': fields.String(required=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+    })
 
 class File_DTO:
     ns = Namespace('upload', description='file and image related operations')

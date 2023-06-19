@@ -215,7 +215,7 @@ class Task_DTO:
         'delivery_freq': fields.Integer(required=True, description='the frequency mail send'),
         'islocked': fields.Boolean(description='can task be modified'),
         'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
-        'ispaused': fields.Boolean(default=False, description='just be paused, can be modified'),
+        # 'ispaused': fields.Boolean(default=False, description='just be paused, can be modified'),
         'createtime': CustomDate(required=True, description='the time when the task created'),
         'modifytime': CustomDate(required=False, dt_format='str_time', description='the time that be modified'),
         'freezetime': CustomDate(required=False, dt_format='str_time', description='the time that be frozen'),
@@ -267,6 +267,37 @@ class Mail_DTO:
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
+
+
+class Event_DTO:
+    ns = Namespace('t_phishing_event', description='phishing event related operations')
+
+    phishing_eventIDsIn = ns.model('phishing_eventIDsIn', IDs_In)
+
+    phishing_event_in = ns.model('phishing_event_in', {
+        'id': fields.Integer(reqired=True, default=1, description='中招记录的id'),
+    })
+
+    html_template_out = ns.model('html_template_out', {
+        'id': fields.Integer(description='中招事件编号'),
+        'type': fields.String(reqired=True, description='中招事件类型'),
+        'time': fields.DateTime(reqired=True, description='中招时间'),
+        'uid': fields.String(reqired=True, description='中招人员id'),
+        'uname': fields.String(description='中招人员姓名'),
+        'task_id': fields.Integer(description='中招任务id'),
+        'catcher_id': fields.Integer(description='捕获用服务器id'),
+        'server_id': fields.Integer(description='发送方服务器id'),
+    })
+
+    searchIn = ns.model('event_Search', {
+        # 'type': fields.String(reqired=True, description='中招事件类型'),
+        # 'time': fields.DateTime(reqired=True, description='中招时间'),
+        'uid': fields.String(reqired=True, description='中招人员id'),
+        'uname': fields.String(description='中招人员姓名'),
+        'task_id': fields.Integer(description='中招任务id'),
+        'catcher_id': fields.Integer(description='捕获用服务器id'),
+        'server_id': fields.Integer(description='发送方服务器id'),
+    })
 
 class File_DTO:
     ns = Namespace('upload', description='file and image related operations')

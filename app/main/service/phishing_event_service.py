@@ -19,6 +19,14 @@ def get_all_events():
     return Phishingevent.query.all(), 201
 
 @jwt_required()
+def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
+    new_event = Phishingevent()
+    data = request.json
+    wj2o(new_event, data)
+    save_changes(new_event)
+    return response_with(SUCCESS_201)
+
+@jwt_required()
 def search_for_events(data):
     # 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理id、冻结状态
     tmp_events = Phishingevent.query
@@ -54,3 +62,7 @@ def search_for_events(data):
         print("ERROR发生，没有找到该发送方服务器相关的信息（冰冷的机械音）")
 
     return tmp_events.all(), 201
+
+def save_changes(data: Phishingevent) -> None:
+    db.session.add(data)
+    db.session.commit()

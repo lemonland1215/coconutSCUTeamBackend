@@ -92,6 +92,7 @@ def get_a_task_users(tid):
     u_list = json.loads(tem_task.target_id_list)
     return u_list
 
+
 def search_for_tasks(data):
     # 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理id、冻结状态
     tmp_tasks = Task.query

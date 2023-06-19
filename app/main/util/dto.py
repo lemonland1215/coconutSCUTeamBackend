@@ -260,9 +260,9 @@ class Mail_DTO:
     html_templateIDsIn = ns.model('html_templateIDsIn', IDs_In)
 
     html_template_in = ns.model('html_template_in', {
-        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
-        'subject': fields.String(reqired=True, default="1", description='邮件主题'),
-        'content': fields.String(reqired=True, default="内容", description='邮件内容'),
+        'type': fields.String(required=True, default="text", description='模板类型：如文本/html、二进制、office等'),
+        'subject': fields.String(required=True, default="1", description='邮件主题'),
+        'content': fields.String(required=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
         'comments': fields.String(description='备注'),
@@ -270,9 +270,9 @@ class Mail_DTO:
 
     html_template_out = ns.model('html_template_out', {
         'id': fields.Integer(description='html template id'),
-        'type': fields.String(reqired=True, default="text", description='模板类型：如文本/html、二进制、office等'),
-        'subject': fields.String(reqired=True, default="1", description='邮件主题'),
-        'content': fields.String(reqired=True, default="内容", description='邮件内容'),
+        'type': fields.String(required=True, default="text", description='模板类型：如文本/html、二进制、office等'),
+        'subject': fields.String(required=True, default="1", description='邮件主题'),
+        'content': fields.String(required=True, default="内容", description='邮件内容'),
         'attachid': fields.Integer(description='附件模板编号'),
         'islocked': fields.Boolean(description='是否锁定;锁定：不允许修改、删除。'),
         'comments': fields.String(description='备注'),
@@ -291,23 +291,28 @@ class Event_DTO:
     phishing_eventIDsIn = ns.model('phishing_eventIDsIn', IDs_In)
 
     phishing_event_in = ns.model('phishing_event_in', {
-        'id': fields.Integer(reqired=True, default=1, description='中招记录的id'),
+        'id': fields.Integer(required=True, description='中招事件编号'),
+        'type': fields.String(required=True, description='中招事件类型'),
+        # 'time': fields.DateTime(required=True, description='中招时间'),
+        'user_input': fields.String(required=True, description='用户输入内容'),
+        'uid': fields.String(required=True, description='中招人员id'),
+        'task_id': fields.Integer(required=True, description='中招任务id'),
+        'catcher_id': fields.Integer(description='捕获用服务器id'),
+        'server_id': fields.Integer(description='发送方服务器id'),
     })
 
     phishing_event_out = ns.model('phishing_event_out', {
         'id': fields.Integer(description='中招事件编号'),
-        'type': fields.String(reqired=True, description='中招事件类型'),
-        'time': fields.DateTime(reqired=True, description='中招时间'),
-        'user_input': fields.String(reqired=True, description='用户输入内容'),
-        'uid': fields.String(reqired=True, description='中招人员id'),
-        'uname': fields.String(description='中招人员姓名'),
+        'type': fields.String(required=True, description='中招事件类型'),
+        'user_input': fields.String(required=True, description='用户输入内容'),
+        'uid': fields.String(required=True, description='中招人员id'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
         'server_id': fields.Integer(description='发送方服务器id'),
     })
 
     searchIn = ns.model('searchIn', {
-        'uid': fields.String(reqired=True, description='中招人员id'),
+        'uid': fields.String(required=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
@@ -317,20 +322,21 @@ class Event_DTO:
 class Sender_DTO:
     ns = Namespace('server_sender', description='server sender event related operations')
 
-    sender_eventIDsIn = ns.model('sender_eventIDsIn', IDs_In)
+    senderIDsIn = ns.model('senderIDsIn', IDs_In)
 
     sender_in = ns.model('sender_in', {
-        'name': fields.Integer(reqired=True, default='name', description='sender name'),
-        'server': fields.String(reqired=True,description='sender IP'),
-        'port': fields.Integer(reqired=True,description='sender port'),
-        'encryptalg': fields.String(reqired=True,description='加密算法'),
-        'password': fields.String(reqired=True,description='密码'),
-        'isfrozen': fields.Boolean(description='冻没',default=0),
-        'islocked': fields.Boolean(description='锁没',default=0),
+        'name': fields.String(required=True, default='name', description='sender name'),
+        'server': fields.String(required=True, description='sender IP'),
+        'port': fields.Integer(required=True, description='sender port'),
+        'encryptalg': fields.String(required=True, description='加密算法'),
+        'password': fields.String(required=True, description='密码'),
+        'isfrozen': fields.Boolean(required=False, default=False, description='冻没'),
+        'islocked': fields.Boolean(required=False, default=False, description='锁没'),
+        'comments': fields.String(description='备注'),
     })
 
     sender_out = ns.model('sender_out', {
-        'name': fields.String(reqired=True, description='sender name'),
+        'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
         'encryptalg': fields.String(description='加密算法'),
@@ -345,7 +351,7 @@ class Sender_DTO:
     })
 
     sender_search = ns.model('sender_search', {
-        'name': fields.String(reqired=True, description='sender name'),
+        'name': fields.String(description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
         'encryptalg': fields.String(description='加密算法'),
@@ -354,11 +360,53 @@ class Sender_DTO:
     })
 
     sender_update = ns.model('sender_update', {
-        'name': fields.String(reqired=True, description='sender name'),
+        'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
         'encryptalg': fields.String(description='加密算法'),
         'password': fields.String(description='密码')
+    })
+
+class Catcher_DTO:
+    ns = Namespace('server_catcher', description='server catcher event related operations')
+
+    catcherIDsIn = ns.model('catcherIDsIn', IDs_In)
+
+    catcher_in = ns.model('catcher_in', {
+        'name': fields.String(required=True, default='name', description='sender name'),
+        'server': fields.String(required=True, description='sender IP'),
+        'port': fields.Integer(required=True, description='sender port'),
+        'isfrozen': fields.Boolean(required=False, default=False, description='冻没'),
+        'islocked': fields.Boolean(required=False, default=False, description='锁没'),
+        'comments': fields.String(description='备注'),
+    })
+
+    catcher_out = ns.model('catcher_out', {
+        'name': fields.String(required=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'freezetime': fields.DateTime(description='冻结时间'),
+        'islocked': fields.Boolean(description='锁没'),
+        'locktime': fields.DateTime(description='锁定时间'),
+        'createdbyuid': fields.Integer(description='创建者id'),
+        'createtime':fields.DateTime(description='创建时间'),
+        'modifiedbyuid': fields.Integer(description='修改者id'),
+        'modifytime': fields.DateTime(description='修改时间')
+    })
+
+    catcher_search = ns.model('catcher_search', {
+        'name': fields.String(description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'islocked': fields.Boolean(description='锁没')
+    })
+
+    catcher_update = ns.model('catcher_update', {
+        'name': fields.String(required=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
     })
 
 

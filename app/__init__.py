@@ -11,6 +11,8 @@ from .main.controller.file_controller import ns as file_ns
 from .main.controller.log_controller import ns as log_ns
 from .main.controller.sender_controller import ns as sender_ns
 from .main.controller.phishing_event_controller import ns as event_ns
+from .main.controller.catcher_controller import ns as catcher_ns
+
 
 api_blueprint = Blueprint('flask-restx', __name__)
 authorizations = {
@@ -38,5 +40,6 @@ api.add_namespace(task_ns, path='/task')
 api.add_namespace(mail_ns, path='/mail')
 api.add_namespace(file_ns, path='/upload')
 api.add_namespace(log_ns, path='/log')
-api.add_namespace(event_ns, path='/event')
-api.add_namespace(sender_ns, path='/sender')
+api.add_namespace(sender_ns, path='/sever_sender')
+api.add_namespace(event_ns, path='/phishing_event')
+api.add_namespace(catcher_ns,path='/server_catcher')

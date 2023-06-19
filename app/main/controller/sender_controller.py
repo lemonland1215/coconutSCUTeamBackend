@@ -28,6 +28,11 @@ class Serversenders(Resource):
         """您可以在这里展示所有的sever sender"""
         return get_all_senders()
 
+    @ns.doc('get_all_sender_id')
+    def get(self):
+        """您可以在这里查看已有的sender的id"""
+        return get_all_sender_ids()
+
     @ns.expect(_SenderIn, validate=True)
     @ns.response(201, 'new sever sender successfully created.')
     @ns.doc('create a new sender')

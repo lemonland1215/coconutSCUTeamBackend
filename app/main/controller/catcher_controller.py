@@ -28,6 +28,12 @@ class Servercatchers(Resource):
         """您可以在这里展示所有的sever catcher"""
         return get_all_catchers()
 
+    @ns.doc('get_all_catcher_id')
+    # @ns.marshal_list_with(_CatcherOut, envelope='children')
+    def get(self):
+        """您可以在这里查看已有的catcher的id"""
+        return get_all_catcher_ids()
+
     @ns.expect(_CatcherIn, validate=True)
     @ns.response(201, 'new sever catcher successfully created.')
     @ns.doc('create a new catcher')
@@ -71,7 +77,7 @@ class Servercatcher(Resource):
     @ns.doc('get a server catcher')
     @ns.marshal_with(_CatcherOut)
     def get(self, id):
-        """get a server sender by its id"""
+        """您可以通过一个<id>获取相应的cather的数据"""
         catcher, http_code = get_a_catcher(id)
         if not catcher:
             ns.abort(404)

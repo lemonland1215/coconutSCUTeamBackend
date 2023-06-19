@@ -404,6 +404,7 @@ class Catcher_DTO:
         'port': fields.Integer(description='sender port'),
     })
 
+
 class File_DTO:
     ns = Namespace('upload', description='file and image related operations')
 

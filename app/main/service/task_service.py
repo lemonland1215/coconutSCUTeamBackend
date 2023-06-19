@@ -164,43 +164,6 @@ def operate_a_task(tid, operator):
             tmp_task.islocked = True
         elif operator == "delete":
             db.session.delete(tmp_task)
-        elif operator == "freeze":
-            tmp_task.isfrozen = True
-            tmp_task.status = 'freeze'
-            tmp_task.freezetime = datetime.now()
-            tmp_task.frozenbyuid = get_jwt_identity()
-        elif operator == "unfreeze":
-            tmp_task.isfrozen = False
-            tmp_task.status = 'running'
-            tmp_task.freezetime = None
-            tmp_task.frozenbyuid = None
-        elif operator == "pause":
-            tmp_task.ispaused = True
-            tmp_task.status = 'pause'
-            tmp_task.pausetime = datetime.now()
-            tmp_task.pausebyuid = get_jwt_identity()
-        elif operator == "restart":
-            if tmp_task.ispaused == True:
-                tmp_task.ispaused = False
-                tmp_task.status = 'running'
-                tmp_task.pausetime = None
-                tmp_task.pausebyuid = None
-            else:
-                return {
-                        "http_status": 400,
-                        "status": "itemNotPaused",
-                        "message": "you can't restart a task while it's not paused."
-                    }
-        elif operator == "begin":
-            if tmp_task.status != 'pause':
-                # 如果任务暂停则说明已经开始
-                tmp_task.status = 'running'
-            else:
-                return {
-                        "http_status": 400,
-                        "status": "itemNotNewBuilt",
-                        "message": "you can only begin a newly built task."
-                    }
         else:
             if operator == "freeze":
                 tmp_task.ispaused = True

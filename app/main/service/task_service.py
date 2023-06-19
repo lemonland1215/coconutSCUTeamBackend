@@ -242,8 +242,6 @@ def send_mails(job_id):
         print('任务未在进行，可能已结束')
 
 
-
-
 def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()

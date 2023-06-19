@@ -215,7 +215,7 @@ class Task_DTO:
         'delivery_freq': fields.Integer(required=True, description='the frequency mail send'),
         'islocked': fields.Boolean(description='can task be modified'),
         'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
-        'ispaused': fields.Boolean(default=False, description='just be paused, can be modified'),
+        # 'ispaused': fields.Boolean(default=False, description='just be paused, can be modified'),
         'createtime': CustomDate(required=True, description='the time when the task created'),
         'modifytime': CustomDate(required=False, dt_format='str_time', description='the time that be modified'),
         'freezetime': CustomDate(required=False, dt_format='str_time', description='the time that be frozen'),

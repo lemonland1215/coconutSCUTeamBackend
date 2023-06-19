@@ -83,7 +83,7 @@ class SearchForMailTemplates(Resource):
     @ns.marshal_list_with(_htmlTemplateOut, envelope='children')
     @ns.expect(_searchWordsIn, validate=True)
     def post(self):
-        """search for tasks by id, partial_name, create_time, modify_time, status, mail_server_name, catcher_name"""
+        """search for tasks by id, partial_name, create_time, modify_time, status"""
         data = request.json
         return search_for_mail_templates(data)
 

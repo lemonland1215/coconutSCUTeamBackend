@@ -168,12 +168,27 @@ def operate_a_task(id, operator):
             tmp_task.pausetime = datetime.now()
             tmp_task.pausebyuid = get_jwt_identity()
         elif operator == "restart":
-            tmp_task.ispaused = False
-            tmp_task.status = 'running'
-            tmp_task.pausetime = None
-            tmp_task.pausebyuid = None
+            if tmp_task.ispaused == True:
+                tmp_task.ispaused = False
+                tmp_task.status = 'running'
+                tmp_task.pausetime = None
+                tmp_task.pausebyuid = None
+            else:
+                return {
+                        "http_status": 400,
+                        "status": "itemNotPaused",
+                        "message": "you can't restart a task while it's not paused."
+                    }
         elif operator == "begin":
-            tmp_task.status = 'running'
+            if tmp_task.status != 'pause':
+                # 如果任务暂停则说明已经开始
+                tmp_task.status = 'running'
+            else:
+                return {
+                        "http_status": 400,
+                        "status": "itemNotNewBuilt",
+                        "message": "you can only begin a newly built task."
+                    }
         else:
             print("欸!?人家没有这种性能哦!")
             print("主人这是菜单（＞人＜；）-> (un)lock|delete|(un)freeze|(un)pause|begin")

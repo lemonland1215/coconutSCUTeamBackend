@@ -13,7 +13,7 @@ class Task(db.Model):
     type = db.Column(db.String(16), nullable=False, comment='任务类型')
     mail_id = db.Column(db.INTEGER, nullable=False, comment='邮件模板id')
     comments = db.Column(db.String(5120), comment='备注')
-    status = db.Column(db.String(16), nullable=False, comment='任务状态：Running|Freeze|Pause|Finish|Waiting')
+    status = db.Column(db.String(16), nullable=False, comment='任务状态：Running|Frozen|Finish|Waiting')
     catcher_id = db.Column(db.INTEGER, nullable=False, comment='捕获服务器id')
     catcher_name = db.Column(db.String(16), nullable=False, comment='捕获服务器名称')
     report_status = db.Column(db.BOOLEAN, nullable=False, comment='报告是否生成')

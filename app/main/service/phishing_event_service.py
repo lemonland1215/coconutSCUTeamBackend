@@ -18,10 +18,11 @@ def get_a_event(id):
 def get_all_events():
     return Phishingevent.query.all(), 201
 
-@jwt_required()
+
 def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     new_event = Phishingevent()
-    data = request.json
+    # data = request.json
+    data['time'] = datetime.now()
     wj2o(new_event, data)
     save_changes(new_event)
     return response_with(SUCCESS_201)

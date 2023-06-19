@@ -68,7 +68,12 @@ class ReceiveEvent(Resource):
 
     @ns.doc('receive a phishing event')
     def post(self, uid, tid):
-        data = request.json
-        print(uid)
-        print(tid)
-        print(data)
+        event = {}
+        event['type'] = 'email phishing'
+        event['user_input'] = str(request.json)
+        event['uid'] = uid
+        event['task_id'] = tid
+        event['catcher_id'] = 1
+        event['server_id'] = 1
+
+        return save_new_event(event)

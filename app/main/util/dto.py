@@ -294,7 +294,7 @@ class Event_DTO:
         'type': fields.String(required=True, description='中招事件类型'),
         # 'time': fields.DateTime(required=True, description='中招时间'),
         'user_input': fields.String(required=True, description='用户输入内容'),
-        'uid': fields.String(required=True, description='中招人员id'),
+        'uid': fields.Integer(required=True, description='中招人员id'),
         'task_id': fields.Integer(required=True, description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
         'server_id': fields.Integer(description='发送方服务器id'),
@@ -304,14 +304,14 @@ class Event_DTO:
         'id': fields.Integer(description='中招事件编号'),
         'type': fields.String(required=True, description='中招事件类型'),
         'user_input': fields.String(required=True, description='用户输入内容'),
-        'uid': fields.String(required=True, description='中招人员id'),
+        'uid': fields.Integer(required=True, description='中招人员id'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
         'server_id': fields.Integer(description='发送方服务器id'),
     })
 
     searchIn = ns.model('searchIn', {
-        'uid': fields.String(required=True, description='中招人员id'),
+        'uid': fields.Integer(required=True, description='中招人员id'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
         'server_id': fields.Integer(description='发送方服务器id'),

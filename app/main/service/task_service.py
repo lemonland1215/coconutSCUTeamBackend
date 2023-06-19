@@ -1,6 +1,7 @@
 from flask import request
-from app.main import db
+from app.main import db, scheduler
 from app.main.model.task import Task
+from app.main.model.user import User
 from app.main.model.project import Project
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
@@ -8,8 +9,11 @@ from app.main.util.write_json_to_obj import wj2o
 from datetime import datetime
 from app.main.util.response_tip import *
 from flask_mail import Mail, Message
+from extention import app
 import json
 
+
+running_jobs = {}
 
 @jwt_required()
 def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
@@ -36,6 +40,14 @@ def get_a_task(id):
 def get_all_tasks():
     return Task.query.all(), 201
 
+def get_a_task_emails(id):
+    em_list = []
+    tem_task = Task.query.filter_by(id=id).first()
+    target_id_list = json.loads(tem_task.target_id_list)
+    for uid in target_id_list:
+        tem_user = User.query.filter_by(id=uid).first()
+        em_list.append(tem_user.email)
+    return em_list
 
 def search_for_tasks(data):
     # 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理id、冻结状态
@@ -137,8 +149,8 @@ def update_a_task(id):
     return response_object, 201
 
 @jwt_required()
-def operate_a_task(id, operator):
-    tmp_task = Task.query.filter_by(id=id).first()
+def operate_a_task(tid, operator):
+    tmp_task = Task.query.filter_by(id=tid).first()
     if not tmp_task:
         return response_with(ITEM_NOT_EXISTS)
     if tmp_task.islocked:
@@ -190,20 +202,91 @@ def operate_a_task(id, operator):
                         "message": "you can only begin a newly built task."
                     }
         else:
-            print("欸!?人家没有这种性能哦!")
-            print("主人这是菜单（＞人＜；）-> (un)lock|delete|(un)freeze|(un)pause|begin")
-            return "INVALID_INPUT", 422
+            if operator == "freeze":
+                tmp_task.ispaused = True
+                tmp_task.status = 'frozen'
+                tmp_task.freezetime = datetime.now()
+                tmp_task.frozenbyuid = get_jwt_identity()
+                job_id = "task_" + str(tid)
+                if job_id in running_jobs:
+                    scheduler.pause_job(id=job_id)
+                else:
+                    print('task is not running!!!')
+            elif operator == "unfreeze":
+                if tmp_task.status == 'frozen':
+                    tmp_task.ispaused = False
+                    tmp_task.status = 'running'
+                    tmp_task.pausetime = None
+                    tmp_task.pausebyuid = None
+                    job_id = "task_" + str(tid)
+                    if job_id in running_jobs:
+                        scheduler.resume_job(id=job_id)
+                    else:
+                        print('task is not running!!!')
+                else:
+                    return {
+                        "code": "itemNotFrozen",
+                        "message": "you can't unfreeze a task if it is not frozen."
+                    }, 400
+            elif operator == "begin":
+                if tmp_task.status == 'waiting':
+                    tmp_task.status = 'running'
+                    emlist = get_a_task_emails(tid)
+
+                    job_id = "task_"+str(tid)
+                    running_jobs[job_id] = {'email_list': emlist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
+                    print(emlist)
+                    scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=tmp_task.delivery_freq)
+                else:
+                    print()
+                    return {
+                        "code": "itemNotWaiting",
+                        "message": "you can't begin a task if it is not waiting."
+                    }, 400
+
+            else:
+                print("欸!?人家没有这种性能哦!")
+                print("主人这是菜单（＞人＜；）-> (un)lock|delete|(un)freeze|begin")
+                return "INVALID_INPUT", 422
     db.session.commit()
     response_object = {
         'code': 'success',
-        'message': f'task {id} safely updated!'.format()
+        'message': f'task {tid} safely updated!'.format()
     }
     return response_object, 201
+
+def send_mails(job_id):
+    if job_id in running_jobs:
+        emlist = running_jobs[job_id]['email_list']
+        sendlist = running_jobs[job_id]['sendlist']
+        if len(sendlist) < len(emlist):
+            next_em = [em for em in emlist if em not in sendlist][0]
+            send_mail(next_em, "夏夏")
+            running_jobs[job_id]['sendlist'].append(next_em)
+        else:
+            running_jobs[job_id]['sendlist'] = []
+            next_em = emlist[0]
+            send_mail(next_em, "夏夏")
+            running_jobs[job_id]['sendlist'].append(next_em)
+
+    else:
+        scheduler.remove_job(job_id)
+        print('任务未在进行，可能已结束')
+
+
 
 
 def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
+
+def send_mail(to_addr, name):
+    mail = Mail()
+    with app.app_context():
+        msg = Message("qqHello " + name, recipients=[to_addr])
+        msg.body = "Hello Flask message sent from Flask-Mail"
+        mail.send(msg)
+
 
 # def send_mails_of_task(id):
 #     mail = Mail()

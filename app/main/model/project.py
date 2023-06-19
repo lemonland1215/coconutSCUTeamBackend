@@ -11,6 +11,7 @@ class Project(db.Model):
     project_manager_id = db.Column(db.INTEGER, nullable=False, comment='项目管理员id')
     project_creator_id = db.Column(db.INTEGER, nullable=False, comment='项目创建人id')
     orgid = db.Column(db.INTEGER, nullable=False, comment='客户公司id')
+    # orgname = db.Column(db.String(100), nullable=False, comment='客户公司名称')
     customer_contact = db.Column(db.String(50), nullable=True, comment='客户对接人')
     contact_email = db.Column(db.String(100), nullable=True, comment='对接人邮箱')
     liaison_id = db.Column(db.INTEGER, nullable=False, comment='项目联系人编号')

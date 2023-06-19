@@ -91,7 +91,7 @@ class PatchProject(Resource):
 class SearchForProjects(Resource):
     """project view"""
     @ns.doc('search_projects')
-    @ns.marshal_list_with(_project_In, envelope='children')
+    @ns.marshal_list_with(_project_Out, envelope='children')
     @ns.expect(_project_Search, validate=True)
     def post(self):
         """Search for projects by id, partial_name, create_time, modify_time"""

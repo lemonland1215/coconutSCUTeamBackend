@@ -15,8 +15,9 @@ def get_all_projects():
                                    Project.customer_contact, Project.contact_email,
                                    Liaison.liaison_name.label('liaison_name'),
                                    Liaison.liaison_email.label('liaison_email'), Project.test_number,
-                                   Project.is_frozen, Project.comment, Project.status, Project.liaison_id,
-                                   Organization.name.label('organization_name'), Organization.id, Project.create_time). \
+                                   Project.is_frozen, Project.is_locked, Project.comment, Project.status,
+                                   Organization.name.label('organization_name'), Project.create_time,
+                                   Project.modified_time). \
         outerjoin(User, Project.project_manager_id == User.id). \
         outerjoin(Liaison, Project.liaison_id == Liaison.liaison_id). \
         outerjoin(Organization, Project.orgid == Organization.id)
@@ -40,6 +41,8 @@ def save_new_project(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                     data = request.json
                     wj2o(new_project, data)
                     new_project.project_creator_id = get_jwt_identity()
+                    new_project.orgname = \
+                        list(db.session.query(Organization.name).filter(Organization.id == data['orgid']).first())[0]
                     print(data['liaison_id'])
                     liaison = db.session.query(Liaison).filter(Liaison.liaison_id == data['liaison_id']).first()
                     if not liaison:
@@ -84,13 +87,14 @@ def get_a_project(id):
                                    Project.customer_contact, Project.contact_email,
                                    Liaison.liaison_name.label('liaison_name'),
                                    Liaison.liaison_email.label('liaison_email'), Project.test_number,
-                                   Project.is_frozen, Project.comment, Project.status,
-                                   Project.liaison_id, Organization.name.label('organization_name'), Organization.id,
-                                   Project.create_time). \
+                                   Project.is_frozen, Project.is_locked, Project.comment, Project.status,
+                                   Organization.name.label('organization_name'),
+                                   Project.create_time, Project.modified_time). \
         outerjoin(User, Project.project_manager_id == User.id). \
         outerjoin(Liaison, Project.liaison_id == Liaison.liaison_id). \
         outerjoin(Organization, Project.orgid == Organization.id). \
         filter(Project.id == id).first()
+    print(tmp_project)
     return tmp_project
 
 
@@ -152,52 +156,64 @@ def operate_a_project(id, operator):
 
 
 def search_for_project(data):
-    tmp_project = Project.query
-    tmp_organization = Organization.query
+    tmp_project = db.session.query(Project.id, Project.projectname, User.username.label('project_manager'),
+                                   Project.customer_contact, Project.contact_email,
+                                   Liaison.liaison_name.label('liaison_name'),
+                                   Liaison.liaison_email.label('liaison_email'), Project.test_number,
+                                   Project.is_frozen, Project.comment, Project.status,
+                                   Organization.name.label('organization_name'), Project.create_time,
+                                   Project.is_locked, Project.modified_time). \
+        outerjoin(User, Project.project_manager_id == User.id). \
+        outerjoin(Liaison, Project.liaison_id == Liaison.liaison_id). \
+        outerjoin(Organization, Project.orgid == Organization.id)
+
     try:
         if data['id']:
-            tmp_project = tmp_project.filter_by(id=data['id'])
+            tmp_project = tmp_project.filter(Project.id == data['id'])
     except:
-        print("无id")
+        print("no such id")
 
     try:
         if data['projectname']:
             tmp_project = tmp_project.filter(Project.projectname.like("%" + data['projectname'] + "%"))
     except:
-        print("无projectname")
+        print("no such projectname")
 
     try:
         if data['orgid']:
-            tmp_project = tmp_project.filter_by(orgid=data['orgid'])
+            tmp_project = tmp_project.filter(Project.orgid == data['orgid'])
     except:
-        print("无orgid")
+        print("no such orgid")
 
     try:
         if data['orgname']:
-            tmp_organization = tmp_organization.filter(Organization.name.like("%" + data['orgname'] + "%"))
-            print(tmp_organization.id)
-            tmp_project = tmp_project.filter_by(orgid=tmp_organization.id)
+            tmp_project = tmp_project.filter(Organization.name.like("%" + data['orgname'] + "%"))
     except:
-        print("无orgname")
+        print("no such orgname")
 
     try:
         if data['is_frozen']:
-            tmp_project = tmp_project.filter_by(is_frozen=data['is_frozen'])
+            tmp_project = tmp_project.filter(Project.is_frozen == data['is_frozen'])
     except:
-        print("无status")
+        print("no frozen projects")
 
-    # try:
-    #     if data['create_time']:
-    # except:
+    try:
+        if data['create_time']:
+            tmp_project = tmp_project.filter(Project.create_time.like("%" + data['create_time'] + "%"))
+    except:
+        print(("no such create time"))
 
-    # try:
-    #     if data['modified_time']:
-    # except:
+    try:
+        if data['modified_time']:
+            tmp_project = tmp_project.filter(Project.modified_time.like("%" + data['modified_time'] + "%"))
+    except:
+        print(("no such modified time"))
 
-    # try:
-    #     if data['manager_name']:
-    # except:
-
+    try:
+        if data['manager_name']:
+            tmp_project = tmp_project.filter(User.username.like("%" + data['create_time'] + "%"))
+    except:
+        print(("no such manager"))
 
     print(tmp_project.all())
     return tmp_project.all(), 201

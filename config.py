@@ -20,17 +20,17 @@ class BaseConfig:
     # MTA Configuration
     MAIL_SERVER = 'smtp.qq.com'
     MAIL_PORT = 465
-    MAIL_USERNAME = '2451875383@qq.com'
-    MAIL_PASSWORD = 'jdnqgxgvaxbvdibd'
-    MAIL_DEFAULT_SENDER = "2451875383@qq.com"
+    MAIL_USERNAME = '1843866642@qq.com'
+    MAIL_PASSWORD = 'fxlegkwmauivdcif'
+    MAIL_DEFAULT_SENDER = "1843866642@qq.com"
     MAIL_USE_SSL = True
     MAIL_USE_TLS = False
 
 class QMailConfig(BaseConfig):
     MAIL_SERVER = 'smtp.qq.com'
     MAIL_PORT = 465
-    MAIL_USERNAME = '2451875383@qq.com'
-    MAIL_PASSWORD = 'jdnqgxgvaxbvdibd'
+    MAIL_USERNAME = '1843866642@qq.com'
+    MAIL_PASSWORD = 'fxlegkwmauivdcif'
     MAIL_DEFAULT_SENDER = "hello"
     MAIL_USE_SSL = True
     MAIL_USE_TLS = False

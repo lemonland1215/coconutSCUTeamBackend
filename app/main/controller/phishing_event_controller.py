@@ -58,6 +58,6 @@ class SearchForEvents(Resource):
     @ns.marshal_list_with(_PhishingEventOut, envelope='children')
     @ns.expect(_event_Search, validate=True)
     def post(self):
-        """search for events by 中招人员id、中招人员姓名、中招任务id、捕获用服务器id、发送方服务器id"""
+        """search for events by 中招人员id、中招任务id、捕获用服务器id、发送方服务器id"""
         data = request.json
         return search_for_events(data)

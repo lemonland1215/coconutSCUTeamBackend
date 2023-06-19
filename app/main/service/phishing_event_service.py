@@ -28,26 +28,14 @@ def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 
 @jwt_required()
 def search_for_events(data):
-    # 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理id、冻结状态
+    # 编号、名称、创建日期、修改日期、项目id、项目经理id、冻结状态
     tmp_events = Phishingevent.query
     try:
         if data['uid']:
             print(data['uid'])
             tmp_events = tmp_events.filter_by(uid=data['uid'])
     except:
-        print("非常抱歉，不过我们这儿似乎没有相关用户的记录")
-
-    try:
-        if data['uname']:
-            tmp_events = tmp_events.filter(Phishingevent.uname.like("%" + data['uname'] + "%"))
-    except:
         print("或许这是鄙人的问题，但我们的确没有找到这位用户相关的记录")
-
-    try:
-        if data['task_id']:
-            tmp_events = tmp_events.filter_by(task_id=data['task_id'])
-    except:
-        print("这是属下的失职！但是确实没有发现这个评测任务相关的中招记录！")
 
     try:
         if data['catcher_id']:

@@ -153,6 +153,7 @@ def operate_a_task(tid, operator):
     tmp_task = Task.query.filter_by(id=tid).first()
     if not tmp_task:
         return response_with(ITEM_NOT_EXISTS)
+
     if tmp_task.islocked:
         if operator != "unlock":
             print("任务已经上锁")
@@ -164,6 +165,13 @@ def operate_a_task(tid, operator):
             tmp_task.islocked = True
         elif operator == "delete":
             db.session.delete(tmp_task)
+            job_id = "task_" + str(tid)
+            try:
+                scheduler.remove_job(job_id)
+                if job_id in running_jobs:
+                    del running_jobs[job_id]
+            except Exception as e:
+                print(e)
         elif tmp_task.status == 'finish':
             return {
                        "code": "itemisFinished",
@@ -171,13 +179,16 @@ def operate_a_task(tid, operator):
                    }, 400
         else:
             if operator == "freeze":
-                tmp_task.ispaused = True
-                tmp_task.status = 'frozen'
-                tmp_task.freezetime = datetime.now()
-                tmp_task.frozenbyuid = get_jwt_identity()
-                job_id = "task_" + str(tid)
-                if job_id in running_jobs:
-                    scheduler.pause_job(id=job_id)
+                if tmp_task.status == 'running':
+                    tmp_task.ispaused = True
+                    tmp_task.status = 'frozen'
+                    tmp_task.freezetime = datetime.now()
+                    tmp_task.frozenbyuid = get_jwt_identity()
+                    job_id = "task_" + str(tid)
+                    if job_id in running_jobs:
+                        scheduler.pause_job(id=job_id)
+                    else:
+                        print('task is not running!!!')
                 else:
                     print('task is not running!!!')
             elif operator == "unfreeze":
@@ -202,7 +213,7 @@ def operate_a_task(tid, operator):
                     emlist = get_a_task_emails(tid)
 
                     job_id = "task_"+str(tid)
-                    running_jobs[job_id] = {'email_list': emlist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
+                    running_jobs[job_id] = {'tid': tid, 'email_list': emlist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
                     print(emlist)
                     scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=tmp_task.delivery_freq)
                 else:
@@ -224,22 +235,32 @@ def operate_a_task(tid, operator):
     return response_object, 201
 
 def send_mails(job_id):
-    if job_id in running_jobs:
-        emlist = running_jobs[job_id]['email_list']
-        sendlist = running_jobs[job_id]['sendlist']
-        if len(sendlist) < len(emlist):
-            next_em = [em for em in emlist if em not in sendlist][0]
-            send_mail(next_em, "夏夏")
-            running_jobs[job_id]['sendlist'].append(next_em)
-        else:
-            running_jobs[job_id]['sendlist'] = []
-            next_em = emlist[0]
-            send_mail(next_em, "夏夏")
-            running_jobs[job_id]['sendlist'].append(next_em)
+    with app.app_context():
+        if job_id in running_jobs:
+            emlist = running_jobs[job_id]['email_list']
+            sendlist = running_jobs[job_id]['sendlist']
+            if len(sendlist) < len(emlist):
+                next_em = [em for em in emlist if em not in sendlist][0]
+                send_mail(next_em, "夏夏")
+                running_jobs[job_id]['sendlist'].append(next_em)
+            else:
+                tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
+                tmp_task.status = 'finish'
+                try:
+                    scheduler.remove_job(job_id)
+                    del running_jobs[job_id]
+                except Exception as e:
+                    print(e)
+                db.session.commit()
+                    # operate_a_task(running_jobs[job_id]['tid'], 'finish')
+                # running_jobs[job_id]['sendlist'] = []
+                # next_em = emlist[0]
+                # send_mail(next_em, "夏夏")
+                # running_jobs[job_id]['sendlist'].append(next_em)
 
-    else:
-        scheduler.remove_job(job_id)
-        print('任务未在进行，可能已结束')
+        else:
+            # scheduler.remove_job(job_id)
+            print('任务未在进行，可能已结束或未开始')
 
 
 

@@ -26,18 +26,19 @@ class CustomDate(fields.DateTime):
         else:
             raise Exception('Unsupported date format %s' % self.dt_format)
 
-searchWordsIn = {
-        'id': fields.Integer(required=False, description='id'),
-        'username': fields.String(required=False, description='name'),
-        'sysrole': fields.String(required=False, description='sysrole'),
-        'is_frozen': fields.String(required=False, description='is_frozen'),
-        'orgid': fields.Integer(required=False, description='orgid')
-    }
 
+searchWordsIn = {
+    'id': fields.Integer(required=False, description='id'),
+    'username': fields.String(required=False, description='name'),
+    'sysrole': fields.String(required=False, description='sysrole'),
+    'is_frozen': fields.String(required=False, description='is_frozen'),
+    'orgid': fields.Integer(required=False, description='orgid')
+}
 
 IDs_In = {
     'id': fields.List(fields.Integer, required=True, description='提供多个编号，列表类型'),
 }
+
 
 class OrganizationDTO:
     ns = Namespace('organization', description='organization related operations')
@@ -46,11 +47,11 @@ class OrganizationDTO:
 
     organizationIn = ns.model('organizationIn', {
         'name': fields.String(required=True, description='organization name'),
-        'logopath': fields.String(required=True, default="N/A",description='organization logo\'s file path'),
+        'logopath': fields.String(required=True, default="N/A", description='organization logo\'s file path'),
         'istoporg': fields.Boolean(required=True, default=False, description='is it a top organization'),
         'higherorgid': fields.Integer(required=True, description='higher organization id'),
-        'islocked': fields.Boolean(required=True, default=False,description='can organization be modified'),
-        'isfrozen': fields.Boolean(required=True, default=False,description='can organization be operated'),
+        'islocked': fields.Boolean(required=True, default=False, description='can organization be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can organization be operated'),
         'frozenbyuid': fields.Integer(description='frozen id'),
         'clientcontact': fields.String(required=True, description='client contact name'),
         'comments': fields.String(required=True, description='organization comments'),
@@ -140,18 +141,22 @@ class Project_DTO:
         'id': fields.Integer(),
         'projectname': fields.String(),
         'project_manager': fields.String(),
+        'orgid': fields.Integer(),
         'organization_name': fields.String(),
         'customer_contact': fields.String(),
         'contact_email': fields.String(),
+        'liaison_id': fields.Integer(),
         'liaison_name': fields.String(),
         'liaison_email': fields.String(),
         'test_number': fields.Integer(),
         'is_frozen': fields.String(),
+        'frozen_by': fields.Integer,
+        'is_locked': fields.String(),
+        'locked_by': fields.Integer,
         'comment': fields.String(),
         'status': fields.String(),
         'create_time': fields.String(),
         'modified_time': fields.String(),
-        'is_locked': fields.String()
     })
 
     updateIn = ns.model('project_Update', {
@@ -173,6 +178,7 @@ class Project_DTO:
         'project_manager': fields.String(required=False, description='project_manager'),
         'is_frozen': fields.Boolean(required=False, description='is_frozen')
     })
+
 
 class Task_DTO:
     ns = Namespace('task', description='task related operations')
@@ -268,5 +274,32 @@ class Mail_DTO:
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
 
+
 class File_DTO:
     ns = Namespace('upload', description='file and image related operations')
+
+
+class Log_DTO:
+    ns = Namespace('log', description='log related operations')
+
+    log_IDs_In = ns.model('log_IDs_In', IDs_In)
+
+    log_Out = ns.model('log_Out', {
+        'id': fields.Integer(),
+        'type': fields.String(),
+        'operator_id': fields.Integer(),
+        'operator': fields.String(),
+        'role': fields.String(),
+        'details': fields.String(),
+        'time': fields.String()
+    })
+
+    log_Search = ns.model(('log_search'), {
+        'id': fields.Integer(required=False, description='log id'),
+        'type': fields.String(required=False, description='log type'),
+        'operator_id': fields.Integer(required=False, description='operator id'),
+        'operator': fields.String(required=False, description='operator name'),
+        'role': fields.String(required=False, description='operator role'),
+        'details': fields.String(required=False, description='details'),
+        'time': fields.String(required=False, description='time')
+    })

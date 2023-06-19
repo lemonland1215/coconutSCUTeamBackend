@@ -17,10 +17,11 @@ def get_all_projects():
                                    Liaison.liaison_email.label('liaison_email'), Project.test_number,
                                    Project.is_frozen, Project.is_locked, Project.comment, Project.status,
                                    Organization.name.label('organization_name'), Project.create_time,
-                                   Project.modified_time). \
+                                   Project.modified_time, Project.orgid, Project.liaison_id). \
         outerjoin(User, Project.project_manager_id == User.id). \
         outerjoin(Liaison, Project.liaison_id == Liaison.liaison_id). \
         outerjoin(Organization, Project.orgid == Organization.id)
+    print(tmp_project.all())
     return tmp_project.all()
 
 
@@ -89,7 +90,7 @@ def get_a_project(id):
                                    Liaison.liaison_email.label('liaison_email'), Project.test_number,
                                    Project.is_frozen, Project.is_locked, Project.comment, Project.status,
                                    Organization.name.label('organization_name'),
-                                   Project.create_time, Project.modified_time). \
+                                   Project.create_time, Project.modified_time, Project.orgid, Project.liaison_id). \
         outerjoin(User, Project.project_manager_id == User.id). \
         outerjoin(Liaison, Project.liaison_id == Liaison.liaison_id). \
         outerjoin(Organization, Project.orgid == Organization.id). \

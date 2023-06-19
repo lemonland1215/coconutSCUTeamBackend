@@ -164,6 +164,11 @@ def operate_a_task(tid, operator):
             tmp_task.islocked = True
         elif operator == "delete":
             db.session.delete(tmp_task)
+        elif tmp_task.status == 'finish':
+            return {
+                       "code": "itemisFinished",
+                       "message": "the task is finished, please create a new one."
+                   }, 400
         else:
             if operator == "freeze":
                 tmp_task.ispaused = True

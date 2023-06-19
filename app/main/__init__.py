@@ -13,10 +13,10 @@ jwt = JWTManager()
 mail = Mail()
 scheduler = APScheduler()
 
-
 def create_app(config_name: str) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config_by_name[config_name])
+    app.config['JWT_SECRET_KEY'] = 'key_for_test'
     db.init_app(app)
     flask_bcrypt.init_app(app)
     jwt.init_app(app)

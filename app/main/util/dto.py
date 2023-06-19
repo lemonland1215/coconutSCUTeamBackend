@@ -26,18 +26,19 @@ class CustomDate(fields.DateTime):
         else:
             raise Exception('Unsupported date format %s' % self.dt_format)
 
-searchWordsIn = {
-        'id': fields.Integer(required=False, description='id'),
-        'username': fields.String(required=False, description='name'),
-        'sysrole': fields.String(required=False, description='sysrole'),
-        'is_frozen': fields.String(required=False, description='is_frozen'),
-        'orgid': fields.Integer(required=False, description='orgid')
-    }
 
+searchWordsIn = {
+    'id': fields.Integer(required=False, description='id'),
+    'username': fields.String(required=False, description='name'),
+    'sysrole': fields.String(required=False, description='sysrole'),
+    'is_frozen': fields.String(required=False, description='is_frozen'),
+    'orgid': fields.Integer(required=False, description='orgid')
+}
 
 IDs_In = {
     'id': fields.List(fields.Integer, required=True, description='提供多个编号，列表类型'),
 }
+
 
 class OrganizationDTO:
     ns = Namespace('organization', description='organization related operations')
@@ -46,11 +47,11 @@ class OrganizationDTO:
 
     organizationIn = ns.model('organizationIn', {
         'name': fields.String(required=True, description='organization name'),
-        'logopath': fields.String(required=True, default="N/A",description='organization logo\'s file path'),
+        'logopath': fields.String(required=True, default="N/A", description='organization logo\'s file path'),
         'istoporg': fields.Boolean(required=True, default=False, description='is it a top organization'),
         'higherorgid': fields.Integer(required=True, description='higher organization id'),
-        'islocked': fields.Boolean(required=True, default=False,description='can organization be modified'),
-        'isfrozen': fields.Boolean(required=True, default=False,description='can organization be operated'),
+        'islocked': fields.Boolean(required=True, default=False, description='can organization be modified'),
+        'isfrozen': fields.Boolean(required=True, default=False, description='can organization be operated'),
         'frozenbyuid': fields.Integer(description='frozen id'),
         'clientcontact': fields.String(required=True, description='client contact name'),
         'comments': fields.String(required=True, description='organization comments'),
@@ -140,18 +141,22 @@ class Project_DTO:
         'id': fields.Integer(),
         'projectname': fields.String(),
         'project_manager': fields.String(),
+        'orgid': fields.Integer(),
         'organization_name': fields.String(),
         'customer_contact': fields.String(),
         'contact_email': fields.String(),
+        'liaison_id': fields.Integer(),
         'liaison_name': fields.String(),
         'liaison_email': fields.String(),
         'test_number': fields.Integer(),
         'is_frozen': fields.String(),
+        'frozen_by': fields.Integer,
+        'is_locked': fields.String(),
+        'locked_by': fields.Integer,
         'comment': fields.String(),
         'status': fields.String(),
         'create_time': fields.String(),
         'modified_time': fields.String(),
-        'is_locked': fields.String()
     })
 
     updateIn = ns.model('project_Update', {
@@ -174,6 +179,7 @@ class Project_DTO:
         'is_frozen': fields.Boolean(required=False, description='is_frozen')
     })
 
+
 class Task_DTO:
     ns = Namespace('task', description='task related operations')
 
@@ -184,9 +190,9 @@ class Task_DTO:
         'project_id': fields.Integer(required=True, description='project id'),
         'type': fields.String(required=True, description='task type'),
         'mail_id': fields.Integer(required=True, description='mail template id'),
-        'status': fields.String(required=True, default='running', descripition='task status'),
+        'status': fields.String(required=True, default='waiting', descripition='task status'),
         'catcher_id': fields.Integer(required=True, descripition='cather server id'),
-        'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
+        # 'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
         'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),
         # 'project_manager': fields.String(required=True, description='task manager name(yifang)'),
         'target_num': fields.Integer(required=False, descripition='target num'),
@@ -196,7 +202,7 @@ class Task_DTO:
         'delivery_address': fields.String(required=True, description='the address of the delivery, like:deliver@mail'),
         'delivery_freq': fields.Integer(required=True, description='the frequency of the sending mails'),
         'mail_server_id': fields.Integer(required=True, description='server id'),
-        'mail_server_name': fields.String(required='True', description='server name'),
+        # 'mail_server_name': fields.String(required='True', description='server name'),
         'islocked': fields.Boolean(required=True, default=False, description='can task be modified'),
         'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
         'ispaused': fields.Boolean(required=False, default=False, description='is this task still running'),
@@ -209,7 +215,7 @@ class Task_DTO:
         'name': fields.String(description='task name'),
         'project_id': fields.String(description='top project id'),
         'type': fields.String(description='mail type'),
-        'catcher_name': fields.String(description='catcher server name'),
+        # 'catcher_name': fields.String(description='catcher server name'),
         'report_status': fields.Boolean(required=True, default=False, description='dose report be generated'),
         'delivery_address': fields.String(description='delivery address'),
         'delivery_freq': fields.Integer(required=True, description='the frequency mail send'),
@@ -233,6 +239,16 @@ class Task_DTO:
         'project_id': fields.Integer(required=False, description='project_id'),
         'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
         'is_frozen': fields.String(required=False, description='is_frozen')
+    })
+
+    updateIn = ns.model('task_Update',{
+        'name': fields.String(description='name'),
+        'type': fields.String(description='mail type'),
+        'project_id': fields.Integer(description='父项目id'),
+        'catcher_id': fields.Integer(description='捕获服务器id'),
+        'mail_server_id': fields.Integer(description='邮件服务器id'),
+        'delivery_freq': fields.Integer(description='发件频率'),
+        'target_id_list': fields.String(description='目标人员list')
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
@@ -278,10 +294,11 @@ class Event_DTO:
         'id': fields.Integer(reqired=True, default=1, description='中招记录的id'),
     })
 
-    html_template_out = ns.model('html_template_out', {
+    phishing_event_out = ns.model('phishing_event_out', {
         'id': fields.Integer(description='中招事件编号'),
         'type': fields.String(reqired=True, description='中招事件类型'),
         'time': fields.DateTime(reqired=True, description='中招时间'),
+        'user_input': fields.String(reqired=True, description='用户输入内容'),
         'uid': fields.String(reqired=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
@@ -289,15 +306,87 @@ class Event_DTO:
         'server_id': fields.Integer(description='发送方服务器id'),
     })
 
-    searchIn = ns.model('event_Search', {
-        # 'type': fields.String(reqired=True, description='中招事件类型'),
-        # 'time': fields.DateTime(reqired=True, description='中招时间'),
+    searchIn = ns.model('searchIn', {
         'uid': fields.String(reqired=True, description='中招人员id'),
         'uname': fields.String(description='中招人员姓名'),
         'task_id': fields.Integer(description='中招任务id'),
         'catcher_id': fields.Integer(description='捕获用服务器id'),
         'server_id': fields.Integer(description='发送方服务器id'),
     })
+
+class Sender_DTO:
+    ns = Namespace('t_server_sender', description='server sender event related operations')
+
+    sender_eventIDsIn = ns.model('sender_eventIDsIn', IDs_In)
+
+    sender_in = ns.model('sender_in', {
+        'name': fields.Integer(reqired=True, default='name', description='sender name'),
+        'server': fields.String(reqired=True,description='sender IP'),
+        'port': fields.Integer(reqired=True,description='sender port'),
+        'encryptalg': fields.String(reqired=True,description='加密算法'),
+        'password': fields.String(reqired=True,description='密码'),
+        'isfrozen': fields.Boolean(description='冻没',default=0),
+        'islocked': fields.Boolean(description='锁没',default=0),
+    })
+
+    sender_out = ns.model('sender_out', {
+        'name': fields.String(reqired=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'encryptalg': fields.String(description='加密算法'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'freezetime': fields.DateTime(description='冻结时间'),
+        'islocked': fields.Boolean(description='锁没'),
+        'locktime': fields.DateTime(description='锁定时间'),
+        'createdbyuid': fields.Integer(description='创建者id'),
+        'createtime':fields.DateTime(description='创建时间'),
+        'modifiedbyuid': fields.Integer(description='修改者id'),
+        'modifytime': fields.DateTime(description='修改时间')
+    })
+
+    sender_search = ns.model('sender_search', {
+        'name': fields.String(reqired=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'encryptalg': fields.String(description='加密算法'),
+        'isfrozen': fields.Boolean(description='冻没'),
+        'islocked': fields.Boolean(description='锁没')
+    })
+
+    sender_update = ns.model('sender_update', {
+        'name': fields.String(reqired=True, description='sender name'),
+        'server': fields.String(description='sender IP'),
+        'port': fields.Integer(description='sender port'),
+        'encryptalg': fields.String(description='加密算法'),
+        'password': fields.String(description='密码')
+    })
+
 
 class File_DTO:
     ns = Namespace('upload', description='file and image related operations')
+
+
+class Log_DTO:
+    ns = Namespace('log', description='log related operations')
+
+    log_IDs_In = ns.model('log_IDs_In', IDs_In)
+
+    log_Out = ns.model('log_Out', {
+        'id': fields.Integer(),
+        'type': fields.String(),
+        'operator_id': fields.Integer(),
+        'operator': fields.String(),
+        'role': fields.String(),
+        'details': fields.String(),
+        'time': fields.String()
+    })
+
+    log_Search = ns.model(('log_search'), {
+        'id': fields.Integer(required=False, description='log id'),
+        'type': fields.String(required=False, description='log type'),
+        'operator_id': fields.Integer(required=False, description='operator id'),
+        'operator': fields.String(required=False, description='operator name'),
+        'role': fields.String(required=False, description='operator role'),
+        'details': fields.String(required=False, description='details'),
+        'time': fields.String(required=False, description='time')
+    })

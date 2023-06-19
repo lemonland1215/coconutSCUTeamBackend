@@ -3,6 +3,8 @@ from app.main import db, scheduler
 from app.main.model.task import Task
 from app.main.model.user import User
 from app.main.model.project import Project
+from app.main.model.server_catcher import Servercatcher
+from app.main.model.server_sender import Serversender
 from app.main.model.mail_template import Mailtemplate
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
@@ -16,16 +18,60 @@ import json
 
 running_jobs = {}
 
+# @jwt_required()
+# def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
+#     task = Task.query.filter_by(name=data['name']).first()
+#     if not task:
+#         new_task = Task()
+#         data = request.json
+#         data['createdbyuid'] = get_jwt_identity()
+#         wj2o(new_task, data)
+#         save_changes(new_task)
+#         return response_with(SUCCESS_201)
+#     else:
+#         response_object = {
+#             'status': 'fail',
+#             'message': 'Task already exists.',
+#         }
+#         return response_object, 409
 @jwt_required()
 def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     task = Task.query.filter_by(name=data['name']).first()
+    project_exist = Project.query.filter(Project.id == data['project_id']).first()
+    mail_exist = Mailtemplate.query.filter(Mailtemplate.id == data['mail_id']).first()
+    catcher_exist = Servercatcher.query.filter(Servercatcher.id == data['catcher_id']).first()
+    mail_server_exist = Serversender.query.filter(Serversender.id == data['mail_server_id']).first()
     if not task:
-        new_task = Task()
-        data = request.json
-        data['createdbyuid'] = get_jwt_identity()
-        wj2o(new_task, data)
-        save_changes(new_task)
-        return response_with(SUCCESS_201)
+        if project_exist:
+            if mail_exist:
+                if catcher_exist:
+                    if mail_server_exist:
+                        new_task = Task()
+                        data = request.json
+                        data['createdbyuid'] = get_jwt_identity()
+                        wj2o(new_task, data)
+                        save_changes(new_task)
+                        return response_with(SUCCESS_201)
+                    else:
+                        return {
+                           "code": "serverNotExist",
+                           "message": "no such mail server, sorry you can't add."
+                        }, 404
+                else:
+                    return {
+                        "code": "catcherNotExist",
+                        "message": "no such catcher server, sorry you can't add."
+                    }, 404
+            else:
+                return {
+                    "code": "mailNotExist",
+                    "message": "no such mail, sorry you can't add."
+                }, 404
+        else:
+            return{
+                "code": "projectNotExist",
+                "message": "no such project, sorry you can't add."
+            }, 404
     else:
         response_object = {
             'status': 'fail',
@@ -125,7 +171,7 @@ def search_for_tasks(data):
 
 @jwt_required()
 def update_a_task(id):
-    # 任务状态：Running|Freeze|Pause|Finish|Stop
+    # update task info ,status not included
     tmp_task = Task.query.filter_by(id=id).first()
     if not tmp_task:
         return response_with(ITEM_NOT_EXISTS)
@@ -135,9 +181,7 @@ def update_a_task(id):
     update_val['modifiedbyuid'] = get_jwt_identity()
     update_val['modifytime'] = datetime.now()
     wj2o(tmp_task, update_val)
-    # update_val['islocked'] = tmp_task.islocked
-    # update_val['isfrozen'] = tmp_task.isfrozen
-    # update_val['isstop'] = tmp_task.isstop
+
     save_changes(tmp_task)
     response_object = {
         'code': 'success',

@@ -15,9 +15,23 @@ class Servercatcher(db.Model):
     createdbyuid = db.Column(db.INTEGER, nullable=False, comment='创建人编号')
     createtime = db.Column(db.DateTime, nullable=False, default=datetime.now(), comment='创建时间')
     freezetime = db.Column(db.DateTime, comment='冻结时间')
-    frozenbyuid = db.Column(db.INTEGER, nullable=False, comment='发起冻结的人编号')
+    frozenbyuid = db.Column(db.INTEGER, comment='发起冻结的人编号')
     modifiedbyuid = db.Column(db.INTEGER, comment='发起修改的用户编号')
     modifytime = db.Column(db.DateTime, comment='修改时间')
-    lockbyuid = db.Column(db.INTEGER, nullable=False, comment='发起锁定的人编号')
-    locktime = db.Column(db.DateTime, nullable=False, comment='锁定时间')
+    lockbyuid = db.Column(db.INTEGER, comment='发起锁定的人编号')
+    locktime = db.Column(db.DateTime, comment='锁定时间')
     comments = db.Column(db.String(5120), comment='备注')
+
+
+    @staticmethod
+    def init_db():
+        catcher = Servercatcher()
+        catcher.name = 'ran'
+        catcher.server = '0.0.0.0'
+        catcher.port = 50
+        catcher.islocked = 0
+        catcher.isfrozen = 0
+        catcher.createdbyuid = 1
+
+        db.session.add(catcher)
+        db.session.commit()

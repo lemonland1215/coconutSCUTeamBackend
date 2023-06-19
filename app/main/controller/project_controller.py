@@ -2,12 +2,9 @@ from app.main.util.dto import Project_DTO
 from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
-from app.main.service.user_service import save_new_user, get_a_user, get_all_users, get_users_by_org_id, \
-    operate_a_user, search_for_user, update_a_user
 from app.main.service.project_service import save_new_project, get_a_project, get_all_projects, get_projects_by_org_id, \
     operate_a_project, search_for_project, update_a_project, delete_projects
 from typing import Dict, Tuple
-from ..util.response_tip import *
 
 ns = Project_DTO.ns
 _project_In = Project_DTO.project_In

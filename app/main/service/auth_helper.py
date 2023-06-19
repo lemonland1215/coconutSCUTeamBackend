@@ -1,9 +1,10 @@
 from pprint import pprint
-
+import jwt
 from datetime import datetime, timedelta, timezone
 from flask import request, session
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity
 from app.main.model.user import User
+from app.main.model.log import Log
 from app.main.model.auth import TokenBlocklist
 from app.main import *
 from typing import Dict, Tuple
@@ -33,13 +34,15 @@ def draw_lines(draw, num, width, height):
         y2 = random.randint(height / 2, height)
         draw.line(((x1, y1), (x2, y2)), fill='black', width=1)
 
+
 def save_token(resp):
     # jti = get_jwt()["jti"]
     jti = resp
     now = datetime.now(timezone.utc)
-    print("jti",jti,"now",now)
+    print("jti", jti, "now", now)
     db.session.add(TokenBlocklist(jti=jti, created_at=now))
     db.session.commit()
+
 
 class Auth:
     @staticmethod
@@ -68,7 +71,7 @@ class Auth:
     def login_user(data: Dict[str, str], session) -> Tuple[Dict[str, str], int]:
         try:
             pprint(request.json)
-            print("session--verify_code: ",session['verify_code'])
+            print("session--verify_code: ", session['verify_code'])
             # print("获取的生成的验证码：", session['verify_code'], ":", "发送来的验证码：", request.json['verify_code'])
             if session['verify_code'] != request.json['verify_code']:
                 Auth.generate_verify_code()
@@ -88,6 +91,15 @@ class Auth:
                         'message': 'Successfully logged in.',
                         'Authorization': auth_token
                     }
+                    login = Log()
+                    login.type = "Login"
+                    session['userid'] = list(db.session.query(User.id).filter(User.email == data.get('email')).first())[0]
+                    login.operator_id = session['userid']
+                    login.role = list(db.session.query(User.sysrole).filter(User.id == session['userid']).first())[0]
+                    login.details = str(login.operator_id) + " login"
+                    login.time = datetime.now()
+                    db.session.add(login)
+                    db.session.commit()
                     return response_object, 200
             else:
                 response_object = {
@@ -108,16 +120,25 @@ class Auth:
     def logout_user(data: str) -> Tuple[Dict[str, str], int]:
         # data -> auth_info
         print("##################################")
-        print("data",data)
+        print("data", data)
         if data:
             auth_token = data.split(" ")[1]
         else:
             auth_token = ''
         if auth_token:
             # resp = User.decode_auth_token(auth_token)
-            print("resp:",auth_token)
+            print("resp:", auth_token)
+            logout = Log()
+            logout.type = "Logout"
+            logout.operator_id = session.get('userid')
+            logout.role = list(db.session.query(User.sysrole).filter(User.id == session.get('userid')).first())[0]
+            logout.details = str(logout.operator_id) + " logout"
+            logout.time = datetime.now()
+            db.session.add(logout)
+            db.session.commit()
+
             # if isinstance(resp, str):
-                # mark the token as blacklisted
+            # mark the token as blacklisted
             return save_token(auth_token)
             # else:
             #     response_object = {
@@ -131,4 +152,3 @@ class Auth:
                 'message': 'Provide a valid auth token.'
             }
             return response_object, 403
-

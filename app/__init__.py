@@ -8,8 +8,7 @@ from .main.controller.project_controller import ns as project_ns
 from .main.controller.task_controller import ns as task_ns
 from .main.controller.mail_controller import ns as mail_ns
 from .main.controller.file_controller import ns as file_ns
-from .main.controller.sender_controller import ns as sender_ns
-from .main.controller.phishing_event_controller import ns as event_ns
+from .main.controller.log_controller import ns as log_ns
 
 api_blueprint = Blueprint('flask-restx', __name__)
 authorizations = {
@@ -36,7 +35,4 @@ api.add_namespace(project_ns, path='/project')
 api.add_namespace(task_ns, path='/task')
 api.add_namespace(mail_ns, path='/mail')
 api.add_namespace(file_ns, path='/upload')
-api.add_namespace(sender_ns, path='/sender')
-api.add_namespace(event_ns, path='/event')
-
-
+api.add_namespace(log_ns, path='/log')

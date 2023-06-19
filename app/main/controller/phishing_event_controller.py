@@ -54,3 +54,14 @@ class SearchForEvents(Resource):
         """search for events by 中招人员id、中招人员姓名、中招任务id、捕获用服务器id、发送方服务器id"""
         data = request.json
         return search_for_events(data)
+
+@ns.route('/receive/<int:uid>/<int:tid>')
+class ReceiveEvent(Resource):
+    """receive a phishing event"""
+
+    @ns.doc('receive a phishing event')
+    def post(self, uid, tid):
+        data = request.json
+        print(uid)
+        print(tid)
+        print(data)

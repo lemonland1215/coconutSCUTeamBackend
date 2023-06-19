@@ -286,7 +286,7 @@ class Mail_DTO:
 
 
 class Event_DTO:
-    ns = Namespace('t_phishing_event', description='phishing event related operations')
+    ns = Namespace('phishing_event', description='phishing event related operations')
 
     phishing_eventIDsIn = ns.model('phishing_eventIDsIn', IDs_In)
 
@@ -315,7 +315,7 @@ class Event_DTO:
     })
 
 class Sender_DTO:
-    ns = Namespace('t_server_sender', description='server sender event related operations')
+    ns = Namespace('server_sender', description='server sender event related operations')
 
     sender_eventIDsIn = ns.model('sender_eventIDsIn', IDs_In)
 

@@ -11,7 +11,7 @@ class Phishingevent(db.Model):
     user_input = db.Column(db.String(50000), nullable=False, comment='用户输入内容')
     time = db.Column(db.DateTime, nullable=False, comment='中招时间')
     uid = db.Column(db.INTEGER, nullable=False, comment='中招人员id')
-    uname = db.Column(db.String(50), nullable=False, comment='中招人员名称')
+    # uname = db.Column(db.String(50), nullable=False, comment='中招人员名称')
     task_id = db.Column(db.INTEGER, nullable=False, comment='中招任务id')
     catcher_id = db.Column(db.INTEGER, nullable=False, comment='捕获用服务器id')
     server_id = db.Column(db.INTEGER, nullable=False, comment='发送方服务器id')

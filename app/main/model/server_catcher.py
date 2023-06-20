@@ -10,6 +10,7 @@ class Servercatcher(db.Model):
     name = db.Column(db.String(50), nullable=False, comment='捕获用服务器名称')
     server = db.Column(db.String(15),nullable=False, comment='IP地址')
     port = db.Column(db.INTEGER, nullable=False, comment='端口号')
+    status = db.Column(db.String(50),nullable=False, default='open', comment='捕获服务器状态：open | close | busy')
     islocked = db.Column(db.BOOLEAN, nullable=False, comment='是否锁定')
     isfrozen = db.Column(db.BOOLEAN, nullable=False, comment='是否冻结')
     createdbyuid = db.Column(db.INTEGER, nullable=False, comment='创建人编号')

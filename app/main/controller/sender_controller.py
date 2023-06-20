@@ -100,6 +100,6 @@ class SearchForSenders(Resource):
     @ns.marshal_list_with(_SenderOut, envelope='children')
     @ns.expect(_sender_Search, validate=True)
     def post(self):
-        """您可以在这里搜索以下内容：name|server|port|encryptalg|isfrozen|islocked"""
+        """您可以在这里搜索以下内容：name|server|port|status|encryptalg|isfrozen|islocked"""
         data = request.json
         return search_for_senders(data)

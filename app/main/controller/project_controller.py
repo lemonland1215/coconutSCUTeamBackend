@@ -23,6 +23,11 @@ class ProjectList(Resource):
         """List all created projects"""
         return get_all_projects()
 
+    # @ns.doc('get_all_project_ids')
+    # def get(self):
+    #     """您可以在这里查看已有的project的id"""
+    #     return get_all_project_ids()
+
     @jwt_required()
     @ns.expect(_project_In, validate=True)
     @ns.response(201, 'Project successfully created.')
@@ -77,6 +82,7 @@ class Project(Resource):
 @ns.response(404, 'Project not found.')
 class PatchProject(Resource):
     """project view"""
+
     @jwt_required()
     @ns.doc('modify a project')
     def patch(self, id, operator):
@@ -87,6 +93,7 @@ class PatchProject(Resource):
 @ns.route('/search')
 class SearchForProjects(Resource):
     """project view"""
+
     @ns.doc('search_projects')
     @ns.marshal_list_with(_project_Out, envelope='children')
     @ns.expect(_project_Search, validate=True)
@@ -94,7 +101,6 @@ class SearchForProjects(Resource):
         """Search for projects by id, partial_name, create_time, modify_time"""
         data = request.json
         return search_for_project(data)
-
 
 # # 通过公司查询
 # @ns.route('/organization/<id>')

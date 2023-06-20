@@ -61,7 +61,6 @@ def create():
     db.drop_all()
     db.create_all()
     User.init_db()
-    Liaison.init_db()
     Mailtemplate.init_db()
     Organization.init_db()
     Project.init_db()

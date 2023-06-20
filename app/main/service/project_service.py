@@ -3,7 +3,6 @@ from app.main import db
 from app.main.model.project import Project
 from app.main.model.user import User
 from app.main.model.organization import Organization
-from app.main.model.liaison import Liaison
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
@@ -25,10 +24,10 @@ def get_all_projects():
                                    Project.orgid.label('organization_id'), Organization.name.label('organization_name'),
                                    Project.status, Project.comment,
                                    Project.is_frozen,
-                                   case([(Project.frozen_by.isnot(None), Project.frozen_by)], else_=literal("")).label(
+                                   case((Project.frozen_by.isnot(None), Project.frozen_by), else_=literal("")).label(
                                        'frozen_by'),
                                    Project.is_locked,
-                                   case([(Project.locked_by.isnot(None), Project.locked_by)], else_=literal("")).label(
+                                   case((Project.locked_by.isnot(None), Project.locked_by), else_=literal("")).label(
                                        'locked_by'),
                                    Project.modified_time, Project.create_time, Project.end_time). \
         outerjoin(creator, Project.project_creator_id == creator.id). \
@@ -147,7 +146,7 @@ def operate_a_project(id, operator):
                 db.session.delete(tmp_project)
             elif operator == "freeze":
                 tmp_project.is_frozen = True
-                tmp_project.status = "Froze"
+                tmp_project.status = "Frozen"
                 tmp_project.frozen_time = datetime.now()
                 tmp_project.modified_time = datetime.now()
                 tmp_project.frozen_by = get_jwt_identity()
@@ -160,8 +159,8 @@ def operate_a_project(id, operator):
             elif operator == "Running":
                 tmp_project.status = "Running"
                 tmp_project.modified_time = datetime.now()
-            elif operator == "Froze":
-                tmp_project.status = "Froze"
+            elif operator == "Frozen":
+                tmp_project.status = "Frozen"
                 tmp_project.modified_time = datetime.now()
             elif operator == "Finish":
                 tmp_project.status = "Finish"

@@ -67,6 +67,29 @@ def get_project_all_users(id):
             'status': 'fail'
         },404
 
+def get_org_all_users(id):
+    if Organization.query.filter_by(id=id).all():
+        print("here")
+        if id != 0:
+            users = User.query.filter_by(orgid=id, sysrole='client').all()
+            if users:
+                return users, 200
+            else:
+                return {
+                    'status': 'fail',
+                    'message': 'no such user, please check the sysrole'
+                },404
+        else:
+            return {
+                'message': 'no such client org',
+                'status': 'fail'
+            },404
+    else:
+        return {
+            'message': 'no such org id',
+            'status': 'fail'
+        },404
+
 
 def generate_token(user: User) -> Tuple[Dict[str, str], int]:
     try:

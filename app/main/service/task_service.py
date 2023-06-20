@@ -50,7 +50,13 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                         data = request.json
                         data['createdbyuid'] = get_jwt_identity()
                         wj2o(new_task, data)
+                        new_task.delivery_time = datetime.now()
                         save_changes(new_task)
+                        job_id = "task_" + str(new_task.id)
+                        ulist = get_a_task_users(new_task.id)
+                        running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq, 'sendlist': []}
+                        scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=new_task.delivery_freq)
+
                         return response_with(SUCCESS_201)
                     else:
                         return {

@@ -25,7 +25,7 @@ class UserList(Resource):
         """List all registered users"""
         return get_all_users()
 
-    # @jwt_required()
+    @jwt_required()
     @ns.expect(_user_In, validate=True)
     @ns.response(201, 'User successfully created.')
     @ns.doc('create a new user')

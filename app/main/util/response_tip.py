@@ -37,6 +37,12 @@ ITEM_FREEZED_400 = {
     "message": "Unfreeze the item if you want want to make it function."
     }
 
+ITEM_STATUS_400 = {
+    "http_status": 400,
+    "status": "itemStatus",
+    "message": "can only close an open one, vice versa."
+    }
+
 SERVER_ERROR_500 = {
     "http_status": 500,
     "status": "serverError",

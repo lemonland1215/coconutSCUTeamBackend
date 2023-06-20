@@ -5,6 +5,7 @@ from app.main import db
 from typing import Dict, Tuple
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from config import QMailConfig
+from app.main.service.log_service import save_log
 
 
 from app.main.model.task import Task
@@ -28,6 +29,8 @@ def save_new_mail_template(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
         data['createdbyuid'] = get_jwt_identity()
         wj2o(new_template, data)
         save_changes(new_template)
+        details = " create a new template."
+        save_log("Create", get_jwt_identity(), details)
         return response_with(SUCCESS_201)
     else:
         response_object = {
@@ -106,7 +109,8 @@ def operate_a_mail_template(id, operator):
         else:
             print("日怪嘞")
             return response_with(INVALID_INPUT_422)
-
+    details = " " + operator + " template " + id
+    save_log("Modify", get_jwt_identity(), details)
     db.session.commit()
     return response_with(SUCCESS_201)
 
@@ -128,6 +132,8 @@ def update_a_mail_template(id):
         'code': 'success',
         'message': f'Template {id} updated!'.format()
     }
+    details = " update template " + id
+    save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 
 

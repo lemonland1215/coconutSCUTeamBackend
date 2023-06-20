@@ -7,6 +7,7 @@ from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
 from datetime import datetime
+from app.main.service.log_service import save_log
 
 
 def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
@@ -15,17 +16,34 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     if not user:
         new_user = User()
         data = request.json
+        wj2o(new_user, data)
         if str(data['sysrole']) != 'sysrole' and str(data['sysrole']) != 'client' and str(data['sysrole']) != 'staff':
             print(data['sysrole'])
             return {
-                'status': 'fail',
-                'message': 'no such role. please choose between:sysrole/client/staff'
-            },404
+                       'status': 'fail',
+                       'message': 'no such role. please choose between:sysrole/client/staff'
+                   }, 404
         else:
             if str(data['sysrole']) == 'sysrole':
+                # wj2o(new_user, data)
                 new_user.orgid = 0
-            wj2o(new_user, data)
+                save_changes(new_user)
+                return generate_token(new_user)
+            else:
+                print(new_user.orgid)
+                if new_user.orgid == 0:
+                    print(type(new_user.orgid))
+                    return {
+                        'status': 'fail',
+                        'message': 'no such org ,org_id should >= 1'
+                    }, 400
+                else:
+                    # wj2o(new_user, data)
+                    save_changes(new_user)
+                    return generate_token(new_user)
             save_changes(new_user)
+            details = " create a new user."
+            save_log("Create", get_jwt_identity(), details)
             return generate_token(new_user)
     else:
         response_object = {
@@ -42,30 +60,32 @@ def get_all_users():
 def get_a_user(id):
     return User.query.filter_by(id=id).first()
 
+
 def get_project_all_users(id):
     if Project.query.filter_by(id=id).first():
         print('?')
         org_id = Project.query.filter_by(id=id).first().orgid
-        print('orgid',org_id)
+        print('orgid', org_id)
         if org_id:
             users = User.query.filter_by(orgid=org_id, sysrole='staff').all()
             if users:
                 return users, 200
             else:
                 return {
-                    'status': 'fail',
-                    'message': 'no such user, please check the sysrole'
-                },404
+                           'status': 'fail',
+                           'message': 'no such user, please check the sysrole'
+                       }, 404
         else:
             return {
-                'message': 'no such orgid',
-                'status': 'fail'
-            },404
+                       'message': 'no such orgid',
+                       'status': 'fail'
+                   }, 404
     else:
         return {
-            'message': 'no such project id',
-            'status': 'fail'
-        },404
+                   'message': 'no such project id',
+                   'status': 'fail'
+               }, 404
+
 
 def get_org_all_users(name):
     tmp_org = Organization.query.filter_by(name=name).first()
@@ -78,19 +98,19 @@ def get_org_all_users(name):
                 return users, 200
             else:
                 return {
-                    'status': 'fail',
-                    'message': 'no such user, please check the sysrole'
-                },404
+                           'status': 'fail',
+                           'message': 'no such user, please check the sysrole'
+                       }, 404
         else:
             return {
-                'message': 'no such client org',
-                'status': 'fail'
-            },404
+                       'message': 'no such client org',
+                       'status': 'fail'
+                   }, 404
     else:
         return {
-            'message': 'no such org',
-            'status': 'fail'
-        },404
+                   'message': 'no such org',
+                   'status': 'fail'
+               }, 404
 
 
 def generate_token(user: User) -> Tuple[Dict[str, str], int]:
@@ -145,6 +165,8 @@ def operate_a_user(id, operator):
         'code': 'success',
         'message': f'User {id} {operator}!'.format().format()
     }
+    details = " " + operator + " user " + id
+    save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 
 
@@ -153,6 +175,8 @@ def delete_users():
     for tmp_user in user:
         db.session.delete(tmp_user)
     db.session.commit()
+    details = " delete all users."
+    save_new_user("Delete", get_jwt_identity(), details)
     return f"delete success", 201
 
 
@@ -213,4 +237,6 @@ def update_a_user(id):
         'code': 'success',
         'message': f'User {id} updated!'.format()
     }
+    details = " update user" + id
+    save_log("Modify", get_jwt_identity(), details)
     return response_object, 201

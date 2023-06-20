@@ -3,7 +3,6 @@ import unittest
 from app.main import db, jwt
 from app import api_blueprint
 from app.main.model.user import User
-from app.main.model.liaison import Liaison
 from app.main.model.mail_template import Mailtemplate
 from app.main.model.auth import TokenBlocklist
 from flask import Response, render_template

@@ -9,11 +9,3 @@ class Liaison(db.Model):
     liaison_id = db.Column(db.INTEGER, primary_key=True, nullable=False, comment='联系人编号')
     liaison_name = db.Column(db.String(50), nullable=False, comment='项目联系人名称')
     liaison_email = db.Column(db.String(100), nullable=False, comment='项目联系人邮箱')
-
-    @staticmethod
-    def init_db():
-        liaison = Liaison()
-        liaison.liaison_name = 'rongye'
-        liaison.liaison_email = 'rongye@mail'
-        db.session.add(liaison)
-        db.session.commit()

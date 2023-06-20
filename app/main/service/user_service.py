@@ -1,7 +1,6 @@
 from flask import request
 from app.main import db
 from app.main.model.user import User
-from app.main.model.liaison import Liaison
 from app.main.model.project import Project
 from app.main.model.organization import Organization
 from typing import Dict, Tuple
@@ -45,6 +44,7 @@ def get_a_user(id):
 
 def get_project_all_users(id):
     if Project.query.filter_by(id=id).first():
+        print('?')
         org_id = Project.query.filter_by(id=id).first().orgid
         print('orgid',org_id)
         if org_id:
@@ -209,11 +209,6 @@ def update_a_user(id):
     wj2o(tmp_user, update_val)
     tmp_user.modified_time = datetime.now()
     save_changes(tmp_user)
-    liaison = db.session.query(Liaison).filter(Liaison.liaison_id == id).first()
-    if liaison:
-        print(update_val['username'])
-        liaison.liaison_name = update_val['username']
-        save_changes(liaison)
     response_object = {
         'code': 'success',
         'message': f'User {id} updated!'.format()

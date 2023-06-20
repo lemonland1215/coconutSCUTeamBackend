@@ -27,8 +27,8 @@ class Servercatcher(db.Model):
     def init_db():
         catcher = Servercatcher()
         catcher.name = 'ran'
-        catcher.server = '0.0.0.0'
-        catcher.port = 50
+        catcher.server = '192.168.43.76'
+        catcher.port = 5004
         catcher.islocked = 0
         catcher.isfrozen = 0
         catcher.createdbyuid = 1

@@ -196,9 +196,9 @@ class Task_DTO:
         'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),
         # 'project_manager': fields.String(required=True, description='task manager name(yifang)'),
         'target_num': fields.Integer(required=False, descripition='target num'),
-        'target_id_list': fields.String(required=True, description='target list'),
+        'target_id_list': fields.String(required=True, default='[2]', description='target list'),
         'delivery_name': fields.String(required=True, description='the name of the person that deliver the mail'),
-        'delivery_time': fields.DateTime(required=False, description='发件时间'),
+        'delivery_time': fields.String(required=False, default='2023-06-20 09:47:30.889212', description='发件时间'),
         'delivery_address': fields.String(required=True, description='the address of the delivery, like:deliver@mail'),
         'delivery_freq': fields.Integer(required=True, description='the frequency of the sending mails'),
         'mail_server_id': fields.Integer(required=True, description='server id'),
@@ -218,6 +218,7 @@ class Task_DTO:
         # 'catcher_name': fields.String(description='catcher server name'),
         'report_status': fields.Boolean(required=True, default=False, description='dose report be generated'),
         'delivery_address': fields.String(description='delivery address'),
+        'delivery_time': fields.String(required=False, default='2023-06-20 09:47:30.889212', description='发件时间'),
         'delivery_freq': fields.Integer(required=True, description='the frequency mail send'),
         'islocked': fields.Boolean(description='can task be modified'),
         'isfrozen': fields.Boolean(required=True, default=False, description='can task be operated'),
@@ -248,7 +249,8 @@ class Task_DTO:
         'catcher_id': fields.Integer(description='捕获服务器id'),
         'mail_server_id': fields.Integer(description='邮件服务器id'),
         'delivery_freq': fields.Integer(description='发件频率'),
-        'target_id_list': fields.String(description='目标人员list')
+        'target_id_list': fields.String(description='目标人员list'),
+        'delivery_time': fields.String(required=False, default='2023-06-20 09:47:30.889212', description='发件时间'),
     })
 
     searchWordsIn = ns.model('searchIn', searchWordsIn)
@@ -334,6 +336,7 @@ class Sender_DTO:
     })
 
     sender_out = ns.model('sender_out', {
+        'id': fields.Integer(description='编号'),
         'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
@@ -380,6 +383,7 @@ class Catcher_DTO:
     })
 
     catcher_out = ns.model('catcher_out', {
+        'id': fields.Integer(description='编号'),
         'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),

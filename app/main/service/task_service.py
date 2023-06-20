@@ -18,22 +18,6 @@ import json
 
 running_jobs = {}
 
-# @jwt_required()
-# def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
-#     task = Task.query.filter_by(name=data['name']).first()
-#     if not task:
-#         new_task = Task()
-#         data = request.json
-#         data['createdbyuid'] = get_jwt_identity()
-#         wj2o(new_task, data)
-#         save_changes(new_task)
-#         return response_with(SUCCESS_201)
-#     else:
-#         response_object = {
-#             'status': 'fail',
-#             'message': 'Task already exists.',
-#         }
-#         return response_object, 409
 @jwt_required()
 def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     task = Task.query.filter_by(name=data['name']).first()
@@ -50,14 +34,24 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                         data = request.json
                         data['createdbyuid'] = get_jwt_identity()
                         wj2o(new_task, data)
-                        new_task.delivery_time = datetime.now()
-                        save_changes(new_task)
-                        job_id = "task_" + str(new_task.id)
-                        ulist = get_a_task_users(new_task.id)
-                        running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq, 'sendlist': []}
-                        scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=new_task.delivery_freq)
+                        date_format = '%Y-%m-%d %H:%M:%S.%f'
+                        date_time = datetime.strptime(new_task.delivery_time, date_format)
+                        new_task.delivery_time = date_time
+                        if date_time < datetime.now():
+                            return {
+                                "code": "timeisnotallowed",
+                                "message": "time is earlier than now!!"
+                            }, 405
+                        else:
+                            save_changes(new_task)
+                            job_id = "task_" + str(new_task.id)
+                            ulist = get_a_task_users(new_task.id)
+                            print(ulist)
+                            running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq, 'sendlist': []}
+                            scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
+                                              seconds=new_task.delivery_freq, start_date=new_task.delivery_time)
 
-                        return response_with(SUCCESS_201)
+                            return response_with(SUCCESS_201)
                     else:
                         return {
                            "code": "serverNotExist",
@@ -180,21 +174,90 @@ def search_for_tasks(data):
 def update_a_task(id):
     # update task info ,status not included
     tmp_task = Task.query.filter_by(id=id).first()
+    old_delivery_time = tmp_task.delivery_time
+    old_target_id_list = tmp_task.target_id_list
+    old_frq = tmp_task.delivery_freq
     if not tmp_task:
         return response_with(ITEM_NOT_EXISTS)
-    if tmp_task.islocked == True:
+    if tmp_task.islocked:
         return response_with(ITEM_LOCKED_400)
-    update_val = request.json
-    update_val['modifiedbyuid'] = get_jwt_identity()
-    update_val['modifytime'] = datetime.now()
-    wj2o(tmp_task, update_val)
+    if tmp_task.status == 'finish':
+        return {
+            "code": "taskHasFinished",
+            "message": "cannot modify a finish task."
+        }, 405
+    elif tmp_task.status == 'running':
+        return {
+            "code": "taskRunning",
+            "message": "cannot modify a running task."
+        }, 405
+    elif tmp_task.status == 'waiting':
+        update_val = request.json
+        update_val['modifiedbyuid'] = get_jwt_identity()
+        update_val['modifytime'] = datetime.now()
+        wj2o(tmp_task, update_val)
+        date_format = '%Y-%m-%d %H:%M:%S.%f'
+        date_time = datetime.strptime(tmp_task.delivery_time, date_format)
+        tmp_task.delivery_time = date_time
+        if date_time < datetime.now():
+            return {
+                       "code": "timeisnotallowed",
+                       "message": "time is earlier than now!!"
+                   }, 405
+        else:
+            save_changes(tmp_task)
+            job_id = "task_" + str(tmp_task.id)
+            ulist = get_a_task_users(tmp_task.id)
+            print(ulist)
+            running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
+                                    'sendlist': []}
+            scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
+                              seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
+            response_object = {
+                'code': 'success',
+                'message': f'Task {id} updated!'.format()
+            }
+            return response_object, 201
+    elif tmp_task.status == 'frozen':
+        update_val = request.json
+        update_val['modifiedbyuid'] = get_jwt_identity()
+        update_val['modifytime'] = datetime.now()
+        wj2o(tmp_task, update_val)
+        date_format = '%Y-%m-%d %H:%M:%S.%f'
+        date_time = datetime.strptime(tmp_task.delivery_time, date_format)
+        tmp_task.delivery_time = date_time
+        # if delivery_time is not changed
+        if tmp_task.delivery_time == old_delivery_time and tmp_task.target_id_list == old_target_id_list and tmp_task.delivery_freq == old_frq:
+            save_changes(tmp_task)
+            response_object = {
+                'code': 'success',
+                'message': f'Task {id} updated!'.format()
+            }
+            return response_object, 201
+        # if delivery_time is changed
+        else:
+            if date_time < datetime.now():
+                return {
+                           "code": "timeisnotallowed",
+                           "message": "time is earlier than now!!"
+                       }, 405
+            else:
+                save_changes(tmp_task)
+                job_id = "task_" + str(tmp_task.id)
+                ulist = get_a_task_users(tmp_task.id)
+                print(ulist)
+                scheduler.remove_job(job_id)
+                running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
+                                        'sendlist': []}
+                scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
+                                  seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
+                scheduler.pause_job(id=job_id)
+                response_object = {
+                    'code': 'success',
+                    'message': f'Task {id} updated!'.format()
+                }
+                return response_object, 201
 
-    save_changes(tmp_task)
-    response_object = {
-        'code': 'success',
-        'message': f'Task {id} updated!'.format()
-    }
-    return response_object, 201
 
 @jwt_required()
 def operate_a_task(tid, operator):
@@ -255,22 +318,22 @@ def operate_a_task(tid, operator):
                         "code": "itemNotFrozen",
                         "message": "you can't unfreeze a task if it is not frozen."
                     }, 400
-            elif operator == "begin":
-                if tmp_task.status == 'waiting':
-                    tmp_task.status = 'running'
-                    tmp_task.delivery_time = datetime.now()
-                    ulist = get_a_task_users(tid)
-
-                    job_id = "task_"+str(tid)
-                    running_jobs[job_id] = {'tid': tid, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
-                    print(ulist)
-                    scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=tmp_task.delivery_freq)
-                else:
-                    print()
-                    return {
-                        "code": "itemNotWaiting",
-                        "message": "you can't begin a task if it is not waiting."
-                    }, 400
+            # elif operator == "begin":
+            #     if tmp_task.status == 'waiting':
+            #         tmp_task.status = 'running'
+            #         tmp_task.delivery_time = datetime.now()
+            #         ulist = get_a_task_users(tid)
+            #
+            #         job_id = "task_"+str(tid)
+            #         running_jobs[job_id] = {'tid': tid, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq, 'sendlist': []}
+            #         print(ulist)
+            #         scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id, seconds=tmp_task.delivery_freq)
+            #     else:
+            #         print()
+            #         return {
+            #             "code": "itemNotWaiting",
+            #             "message": "you can't begin a task if it is not waiting."
+            #         }, 400
 
             else:
                 print("欸!?人家没有这种性能哦!")
@@ -290,6 +353,7 @@ def send_mails(job_id):
             sendlist = running_jobs[job_id]['sendlist']
             tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
             if len(sendlist) < len(ulist):
+                tmp_task.status = 'running'
                 mailtempid = tmp_task.mail_id
                 tmp_mtemplate = Mailtemplate.query.filter_by(id=mailtempid).first()
                 subject = tmp_mtemplate.subject
@@ -310,7 +374,7 @@ def send_mails(job_id):
                     del running_jobs[job_id]
                 except Exception as e:
                     print(e)
-                db.session.commit()
+            db.session.commit()
                     # operate_a_task(running_jobs[job_id]['tid'], 'finish')
                 # running_jobs[job_id]['sendlist'] = []
                 # next_em = emlist[0]
@@ -329,7 +393,7 @@ def save_changes(data: Task) -> None:
 def send_mail(to_addr, name, subject, context):
     mail = Mail()
     with app.app_context():
-        msg = Message("qqHello " + name + subject, recipients=[to_addr])
+        msg = Message(name + subject, recipients=[to_addr])
         msg.html = context
         mail.send(msg)
 

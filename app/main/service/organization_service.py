@@ -76,8 +76,6 @@ def search_for_organizations(data):
     except:
         print("无frozen")
 
-
-
     print(tmp_orgs.all())
     return tmp_orgs.all(), 201
 

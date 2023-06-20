@@ -129,55 +129,56 @@ class Project_DTO:
 
     # 创建输入的DTO，对可输入字段进行过滤
     project_In = ns.model('project_In', {
-        'projectname': fields.String(required=True, description='name'),
-        'project_manager_id': fields.Integer(required=True, default=1, description='project_manager_id'),
-        'orgid': fields.Integer(required=True, default=1, description='orgid'),
-        'customer_contact': fields.String(required=False, description='客户对接人'),
-        'contact_email': fields.String(required=False, description='客户联系邮箱'),
-        'liaison_id': fields.Integer(required=True, default=1, description='联系人id'),
-        'comment': fields.String(required=False, description='comment')
+        'project_name': fields.String(required=True, description='name'),
+        'project_manager': fields.String(required=True, default="cyb", description='甲方负责人'),
+        # 'project_manager_id': fields.String(required=True, default=1, description='client_id'),
+        'organization_name': fields.String(required=True, default="猫猫缝补公司", description='organization name'),
+        # 'organization_id': fields.String(required=True, default=1, description='organization_id'),
+        'comment': fields.String(required=False, default="喵喵喵", description='comment')
     }, strict=True)
 
     project_Out = ns.model('project_Out', {
         'id': fields.Integer(),
-        'projectname': fields.String(),
-        'project_manager': fields.String(),
-        'orgid': fields.Integer(),
+        'project_name': fields.String(),
+        'project_creator_id': fields.String,
+        'project_creator_name': fields.String(),
+        'project_creator_email': fields.String(),
+        'project_manager_id': fields.String,
+        'project_manager_name': fields.String(),
+        'project_manager_email': fields.String(),
+        'organization_id': fields.String(),
         'organization_name': fields.String(),
-        'customer_contact': fields.String(),
-        'contact_email': fields.String(),
-        'liaison_id': fields.Integer(),
-        'liaison_name': fields.String(),
-        'liaison_email': fields.String(),
-        'test_number': fields.Integer(),
-        'is_frozen': fields.String(),
-        'frozen_by': fields.Integer,
-        'is_locked': fields.String(),
-        'locked_by': fields.Integer,
-        'comment': fields.String(),
         'status': fields.String(),
-        'create_time': fields.String(),
-        'modified_time': fields.String(),
+        'comment': fields.String(),
+        'is_frozen': fields.String(),
+        'frozen_by': fields.String,
+        'is_locked': fields.String(),
+        'locked_by': fields.String,
+        'modified_time': CustomDate(dt_format='str_time'),
+        'create_time': CustomDate(dt_format='str_time'),
+        'end_time': CustomDate(dt_format='str_time')
     })
 
     updateIn = ns.model('project_Update', {
-        'projectname': fields.String(required=False, description='name'),
-        'project_manager_id': fields.Integer(required=False, description='project_manager_id'),
-        'customer_contact': fields.String(required=False, description='客户对接人'),
-        'contact_email': fields.String(required=False, description='客户联系邮箱'),
-        'liaison_id': fields.Integer(required=False, description='liaison_id'),
+        'project_name': fields.String(required=False, description='name'),
+        'project_manager': fields.String(required=True, default="cyb", description='甲方负责人'),
+        # 'project_manager_id': fields.String(required=False, description='project_manager_id'),
         'comment': fields.String(required=False, description='sysrole')
     })
 
     searchIn = ns.model('project_Search', {
-        'id': fields.Integer(required=False, description='id'),
-        'projectname': fields.String(required=False, description='name'),
-        'create_time': fields.String(required=False, description='create_time'),
-        'modified_time': fields.String(required=False, description='modified_time'),
-        'orgname': fields.String(required=False, description='orgname'),
-        'orgid': fields.Integer(required=False, description='orgid'),
-        'project_manager': fields.String(required=False, description='project_manager'),
-        'is_frozen': fields.Boolean(required=False, description='is_frozen')
+        'id': fields.String(required=False, description='id'),
+        'project_name': fields.String(required=False, description='name'),
+        'project_creator_id': fields.String(required=False, description='creator id'),
+        'project_creator_name': fields.String(required=False, description='creator name'),
+        'project_manager_id': fields.String(required=False, description='manager id'),
+        'project_manager_name': fields.String(required=False, description='manager name'),
+        'organization_id': fields.String(required=False, description='organization_id'),
+        'organization_name': fields.String(required=False, description='organization_name'),
+        'is_locked': fields.Boolean(required=False, description='is_locked'),
+        'is_frozen': fields.Boolean(required=False, description='is_frozen'),
+        'create_time': CustomDate(required=False, dt_format='str_time', description='create_time'),
+        'modified_time': CustomDate(required=False, dt_format='str_time', description='modified_time')
     })
 
 
@@ -196,7 +197,7 @@ class Task_DTO:
         # 'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
         'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),
         # 'project_manager': fields.String(required=True, description='task manager name(yifang)'),
-        'target_num': fields.Integer(required=False, descripition='target num'),
+        # 'target_num': fields.Integer(required=False, descripition='target num'),
         'target_id_list': fields.String(required=True, default='[2]', description='target list'),
         'delivery_name': fields.String(required=True, description='the name of the person that deliver the mail'),
         'delivery_time': fields.String(required=False, default='2023-06-20 09:47:30.889212', description='发件时间'),
@@ -243,7 +244,7 @@ class Task_DTO:
         'is_frozen': fields.String(required=False, description='is_frozen')
     })
 
-    updateIn = ns.model('task_Update',{
+    updateIn = ns.model('task_Update', {
         'name': fields.String(description='name'),
         'type': fields.String(description='mail type'),
         'project_id': fields.Integer(description='父项目id'),
@@ -320,6 +321,7 @@ class Event_DTO:
         'server_id': fields.Integer(description='发送方服务器id'),
     })
 
+
 class Sender_DTO:
     ns = Namespace('server_sender', description='server sender event related operations')
 
@@ -347,7 +349,7 @@ class Sender_DTO:
         'islocked': fields.Boolean(description='锁没'),
         'locktime': fields.DateTime(description='锁定时间'),
         'createdbyuid': fields.Integer(description='创建者id'),
-        'createtime':fields.DateTime(description='创建时间'),
+        'createtime': fields.DateTime(description='创建时间'),
         'modifiedbyuid': fields.Integer(description='修改者id'),
         'modifytime': fields.DateTime(description='修改时间')
     })
@@ -368,6 +370,7 @@ class Sender_DTO:
         'encryptalg': fields.String(description='加密算法'),
         'password': fields.String(description='密码')
     })
+
 
 class Catcher_DTO:
     ns = Namespace('server_catcher', description='server catcher event related operations')
@@ -394,7 +397,7 @@ class Catcher_DTO:
         'locktime': fields.DateTime(description='锁定时间'),
         'lockbyuid': fields.DateTime(description='锁定人编号'),
         'createdbyuid': fields.Integer(description='创建者id'),
-        'createtime':fields.DateTime(description='创建时间'),
+        'createtime': fields.DateTime(description='创建时间'),
         'modifiedbyuid': fields.Integer(description='修改者id'),
         'modifytime': fields.DateTime(description='修改时间'),
         'frozenbyuid': fields.Integer(description='创建者id'),

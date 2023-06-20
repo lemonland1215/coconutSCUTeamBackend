@@ -49,7 +49,8 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                             job_id = "task_" + str(new_task.id)
                             ulist = get_a_task_users(new_task.id)
                             print(ulist)
-                            running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq, 'sendlist': []}
+                            running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq,
+                                                    'sendlist': [], 'retry': 0}
                             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                               seconds=new_task.delivery_freq, start_date=new_task.delivery_time)
 
@@ -104,12 +105,14 @@ def search_for_tasks(data):
         if data['id']:
             print(data['id'])
             tmp_tasks = tmp_tasks.filter_by(id=data['id'])
+            return tmp_tasks.all(), 201
     except:
         print("没有是这个编号的任务哦")
 
     try:
         if data['name']:
             tmp_tasks = tmp_tasks.filter(Task.name.like("%" + data['name'] + "%"))
+            return tmp_tasks.all(), 201
     except:
         print("没有是这个名称的任务哦")
 
@@ -117,7 +120,8 @@ def search_for_tasks(data):
         if data['create_time_begin'] and data['create_time_end']:
             tmp_tasks = tmp_tasks.filter(
                 Task.createtime.between(data['create_time_start'], data['create_time_end']))
-            print(tmp_tasks.all())
+            # print(tmp_tasks.all())
+            return tmp_tasks.all(), 201
     except Exception as e:
         print("没有在这个时间区间内创建的任务哦", e)
 
@@ -125,12 +129,14 @@ def search_for_tasks(data):
         if data['modify_time_start'] and data['modify_time_end']:
             tmp_tasks = tmp_tasks.filter(
                 Task.modifytime.between(data['modify_time_start'], data['modify_time_end']))
+            return tmp_tasks.all(), 201
     except:
         print("没有在这个时间区间修改的任务哦")
 
     try:
         if data['project_id']:
             tmp_tasks = tmp_tasks.filter_by(project_id=data['project_id'])
+            return tmp_tasks.all(), 201
     except:
         print("没有是这个项目id的任务哦")
 
@@ -164,12 +170,16 @@ def search_for_tasks(data):
     try:
         if data['isfrozen']:
             tmp_tasks = tmp_tasks.filter_by(status=data['isfrozen'])
+            return tmp_tasks.all(), 201
     except:
         print("没有状态为冻结的任务哦")
 
     # print(tmp_tasks.all())
     # print(tmp_projects.all())
-    return tmp_tasks.all(), 201
+    return {
+        'status': 'fail',
+        'message': '看上去没有搜索任何东西呢'
+    },404
 
 
 @jwt_required()
@@ -211,8 +221,10 @@ def update_a_task(id):
             job_id = "task_" + str(tmp_task.id)
             ulist = get_a_task_users(tmp_task.id)
             print(ulist)
+            scheduler.remove_job(job_id)
             running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                    'sendlist': []}
+                                    'sendlist': [], 'retry': 0}
+
             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                               seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
             response_object = {
@@ -237,6 +249,20 @@ def update_a_task(id):
             }
             return response_object, 201
         # if delivery_time is changed
+        elif tmp_task.delivery_time == old_delivery_time and tmp_task.target_id_list == old_target_id_list:
+            save_changes(tmp_task)
+            job_id = "task_" + str(tmp_task.id)
+            scheduler.remove_job(job_id)
+            running_jobs[job_id]['interval_seconds'] = tmp_task.delivery_freq
+            scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
+                              seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
+            scheduler.pause_job(id=job_id)
+            response_object = {
+                'code': 'success',
+                'message': f'Task {id} updated!'.format()
+            }
+            return response_object, 201
+
         else:
             if date_time < datetime.now():
                 return {
@@ -250,7 +276,7 @@ def update_a_task(id):
                 print(ulist)
                 scheduler.remove_job(job_id)
                 running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                        'sendlist': []}
+                                        'sendlist': [], 'retry': 0}
                 scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                   seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
                 scheduler.pause_job(id=job_id)
@@ -364,11 +390,22 @@ def send_mails(job_id):
                 tmp_user = User.query.filter_by(id=next_uid).first()
                 tmp_em = tmp_user.email
                 tmp_name = tmp_user.username
+                db.session.commit()
                 user = {'name': tmp_name, 'uid': next_uid, 'tid': running_jobs[job_id]['tid']}
                 content = render_template_string(content, user=user)
                 print(content)
-                send_mail(tmp_em, tmp_name, subject, content)
-                running_jobs[job_id]['sendlist'].append(next_uid)
+                try:
+                    send_mail(tmp_em, tmp_name, subject, content)
+                except Exception as e:
+                    running_jobs[job_id]['retry'] += 1
+                    print(running_jobs[job_id]['retry'])
+                    if running_jobs[job_id]['retry'] >= 3:
+                        print('重试失败')
+                        running_jobs[job_id]['sendlist'].append(next_uid)
+                        running_jobs[job_id]['retry'] = 0
+                else:
+                    running_jobs[job_id]['sendlist'].append(next_uid)
+                    running_jobs[job_id]['retry'] = 0
             else:
                 tmp_task.status = 'finish'
                 try:
@@ -376,12 +413,7 @@ def send_mails(job_id):
                     del running_jobs[job_id]
                 except Exception as e:
                     print(e)
-            db.session.commit()
-                    # operate_a_task(running_jobs[job_id]['tid'], 'finish')
-                # running_jobs[job_id]['sendlist'] = []
-                # next_em = emlist[0]
-                # send_mail(next_em, "夏夏")
-                # running_jobs[job_id]['sendlist'].append(next_em)
+                db.session.commit()
 
         else:
             # scheduler.remove_job(job_id)

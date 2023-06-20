@@ -3,7 +3,7 @@ from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from app.main.service.user_service import save_new_user, get_a_user, get_all_users, get_users_by_org_id, \
-    operate_a_user, search_for_user, update_a_user, delete_users, get_project_all_users
+    operate_a_user, search_for_user, update_a_user, delete_users, get_project_all_users, get_org_all_users
 from typing import Dict, Tuple
 from ..util.response_tip import *
 
@@ -48,8 +48,17 @@ class ProjectUser(Resource):
     @ns.doc('List all registered users')
     @ns.marshal_list_with(_user_Out, envelope='children')
     def get(self, id):
-        """输出指定project<id>的所有用户"""
+        """输出指定project<id>的所有用户(staff)"""
         return get_project_all_users(id)
+
+@ns.route('/<name>/org/info')
+@ns.param('name', 'The Org name')
+class ProjectUser(Resource):
+    @ns.doc('List all registered users by specific org name')
+    @ns.marshal_list_with(_user_Out, envelope='children')
+    def get(self, name):
+        """输出指定organization<name>的所有用户(client)"""
+        return get_org_all_users(name)
 
 # 直接通过id查询
 @ns.route('/<id>')

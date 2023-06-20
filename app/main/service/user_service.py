@@ -21,7 +21,7 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
             return {
                 'status': 'fail',
                 'message': 'no such role. please choose between:sysrole/client/staff'
-            }
+            },404
         else:
             if str(data['sysrole']) == 'sysrole':
                 new_user.orgid = 0
@@ -64,6 +64,31 @@ def get_project_all_users(id):
     else:
         return {
             'message': 'no such project id',
+            'status': 'fail'
+        },404
+
+def get_org_all_users(name):
+    tmp_org = Organization.query.filter_by(name=name).first()
+    if tmp_org:
+        org_id = tmp_org.id
+        print("here")
+        if org_id != 0:
+            users = User.query.filter_by(orgid=org_id, sysrole='client').all()
+            if users:
+                return users, 200
+            else:
+                return {
+                    'status': 'fail',
+                    'message': 'no such user, please check the sysrole'
+                },404
+        else:
+            return {
+                'message': 'no such client org',
+                'status': 'fail'
+            },404
+    else:
+        return {
+            'message': 'no such org',
             'status': 'fail'
         },404
 

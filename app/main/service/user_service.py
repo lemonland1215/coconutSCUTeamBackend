@@ -21,7 +21,7 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
             return {
                 'status': 'fail',
                 'message': 'no such role. please choose between:sysrole/client/staff'
-            }
+            },404
         else:
             if str(data['sysrole']) == 'sysrole':
                 new_user.orgid = 0

@@ -192,7 +192,7 @@ class Task_DTO:
         'project_id': fields.Integer(required=True, description='project id'),
         'type': fields.String(required=True, description='task type'),
         'mail_id': fields.Integer(required=True, description='mail template id'),
-        'status': fields.String(required=True, default='waiting', descripition='task status'),
+        # 'status': fields.String(required=True, default='waiting', descripition='task status'),
         'catcher_id': fields.Integer(required=True, descripition='cather server id'),
         # 'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
         'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),

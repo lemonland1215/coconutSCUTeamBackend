@@ -36,27 +36,43 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                         data = request.json
                         data['createdbyuid'] = get_jwt_identity()
                         wj2o(new_task, data)
-                        date_format = '%Y-%m-%d %H:%M:%S.%f'
-                        date_time = datetime.strptime(new_task.delivery_time, date_format)
-                        new_task.delivery_time = date_time
-                        new_task.target_num = len(eval(str(new_task.target_id_list)))
-                        if date_time < datetime.now():
-                            return {
-                                "code": "timeisnotallowed",
-                                "message": "time is earlier than now!!"
-                            }, 405
-                        else:
+                        if new_task.type == 'mail':
+                            date_format = '%Y-%m-%d %H:%M:%S.%f'
+                            date_time = datetime.strptime(new_task.delivery_time, date_format)
+                            new_task.delivery_time = date_time
+                            new_task.target_num = len(eval(str(new_task.target_id_list)))
+
+                            if date_time < datetime.now():
+                                return {
+                                    "code": "timeisnotallowed",
+                                    "message": "time is earlier than now!!"
+                                }, 405
+                            else:
+                                save_changes(new_task)
+                                job_id = "task_" + str(new_task.id)
+                                ulist = get_a_task_users(new_task.id)
+                                print(ulist)
+                                sender = Serversender.query.filter(Serversender.id == new_task.mail_server_id).first()
+                                server_sender = sender.server
+                                running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq,
+                                                        'sendlist': [], 'retry': 0, 'sender': server_sender}
+                                scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
+                                                  seconds=new_task.delivery_freq, start_date=new_task.delivery_time)
+                                details = " create a new task."
+                                save_log("Create", get_jwt_identity(), details)
+                                return response_with(SUCCESS_201)
+                        elif new_task.type == 'qrcode':
+                            new_task.delivery_time = datetime.now()
+                            new_task.target_num = len(eval(str(new_task.target_id_list)))
                             save_changes(new_task)
-                            job_id = "task_" + str(new_task.id)
-                            ulist = get_a_task_users(new_task.id)
-                            print(ulist)
-                            running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq,
-                                                    'sendlist': [], 'retry': 0}
-                            scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
-                                              seconds=new_task.delivery_freq, start_date=new_task.delivery_time)
                             details = " create a new task."
                             save_log("Create", get_jwt_identity(), details)
                             return response_with(SUCCESS_201)
+                        else:
+                            return {
+                                       "code": "typeNotSupport",
+                                       "message": "only mail and qrcode is support."
+                                   }, 405
                     else:
                         return {
                            "code": "serverNotExist",
@@ -223,9 +239,14 @@ def update_a_task(id):
             job_id = "task_" + str(tmp_task.id)
             ulist = get_a_task_users(tmp_task.id)
             print(ulist)
-            scheduler.remove_job(job_id)
+            try:
+                scheduler.remove_job(job_id)
+            except Exception as e:
+                print(e)
+            sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
+            server_sender = sender.server
             running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                    'sendlist': [], 'retry': 0}
+                                    'sendlist': [], 'retry': 0, 'sender': server_sender}
 
             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                               seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
@@ -244,6 +265,9 @@ def update_a_task(id):
         tmp_task.delivery_time = date_time
         # if delivery_time is not changed
         if tmp_task.delivery_time == old_delivery_time and tmp_task.target_id_list == old_target_id_list and tmp_task.delivery_freq == old_frq:
+            job_id = "task_" + str(tmp_task.id)
+            sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
+            running_jobs[job_id]['sender'] = sender
             save_changes(tmp_task)
             response_object = {
                 'code': 'success',
@@ -255,6 +279,8 @@ def update_a_task(id):
             save_changes(tmp_task)
             job_id = "task_" + str(tmp_task.id)
             scheduler.remove_job(job_id)
+            sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
+            running_jobs[job_id]['sender'] = sender
             running_jobs[job_id]['interval_seconds'] = tmp_task.delivery_freq
             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                               seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
@@ -277,8 +303,10 @@ def update_a_task(id):
                 ulist = get_a_task_users(tmp_task.id)
                 print(ulist)
                 scheduler.remove_job(job_id)
+                sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
+                running_jobs[job_id]['sender'] = sender
                 running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                        'sendlist': [], 'retry': 0}
+                                        'sendlist': [], 'retry': 0, 'sender': sender}
                 scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                   seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
                 scheduler.pause_job(id=job_id)
@@ -384,7 +412,7 @@ def operate_a_task(tid, operator):
         'code': 'success',
         'message': f'task {tid} safely updated!'.format()
     }
-    details = " " + operator + " task " + id
+    details = " " + operator + " task " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 
@@ -393,6 +421,7 @@ def send_mails(job_id):
         if job_id in running_jobs:
             ulist = running_jobs[job_id]['u_list']
             sendlist = running_jobs[job_id]['sendlist']
+            sender = running_jobs[job_id]['sender']
             tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
             if len(sendlist) < len(ulist):
                 tmp_task.status = 'running'

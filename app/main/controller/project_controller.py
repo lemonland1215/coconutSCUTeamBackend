@@ -3,7 +3,7 @@ from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from app.main.service.project_service import save_new_project, get_a_project, get_all_projects, get_projects_by_org_id, \
-    operate_a_project, search_for_project, update_a_project, delete_projects,get_all_project_ids
+    operate_a_project, search_for_project, update_a_project, delete_projects
 from typing import Dict, Tuple
 
 ns = Project_DTO.ns
@@ -82,6 +82,7 @@ class Project(Resource):
 @ns.response(404, 'Project not found.')
 class PatchProject(Resource):
     """project view"""
+
     @jwt_required()
     @ns.doc('modify a project')
     def patch(self, id, operator):
@@ -92,6 +93,7 @@ class PatchProject(Resource):
 @ns.route('/search')
 class SearchForProjects(Resource):
     """project view"""
+
     @ns.doc('search_projects')
     @ns.marshal_list_with(_project_Out, envelope='children')
     @ns.expect(_project_Search, validate=True)
@@ -99,7 +101,6 @@ class SearchForProjects(Resource):
         """Search for projects by id, partial_name, create_time, modify_time"""
         data = request.json
         return search_for_project(data)
-
 
 # # 通过公司查询
 # @ns.route('/organization/<id>')

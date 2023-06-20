@@ -42,10 +42,6 @@ def get_a_sender(id):
 def get_all_senders():
     return Serversender.query.all(), 201
 
-def get_all_sender_ids():
-    senders = Serversender.query.all()
-    sender_ids = [sender.id for sender in senders]
-    return sender_ids, 201
 
 @jwt_required()
 def update_a_sender(id):

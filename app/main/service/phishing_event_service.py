@@ -18,7 +18,6 @@ def get_a_event(id):
 def get_all_events():
     return Phishingevent.query.all(), 201
 
-
 def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     new_event = Phishingevent()
     # data = request.json
@@ -29,7 +28,6 @@ def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 
 @jwt_required()
 def search_for_events(data):
-    # 编号、名称、创建日期、修改日期、项目id、项目经理id、冻结状态
     tmp_events = Phishingevent.query
     try:
         if data['uid']:
@@ -43,6 +41,12 @@ def search_for_events(data):
             tmp_events = tmp_events.filter_by(catcher_id=data['catcher_id'])
     except:
         print("没有，没有，这里没有这个捕获服务器相关的记录，没有...")
+
+    try:
+        if data['task_id']:
+            tmp_events = tmp_events.filter_by(task_id=data['task_id'])
+    except:
+        print("找啊找，没有这个task相关的内容哦，算不算是另类的欧气呢？")
 
     try:
         if data['server_id']:

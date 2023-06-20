@@ -2,6 +2,8 @@ from flask import request
 from app.main import db
 from app.main.model.user import User
 from app.main.model.liaison import Liaison
+from app.main.model.project import Project
+from app.main.model.organization import Organization
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
@@ -9,13 +11,23 @@ from datetime import datetime
 
 
 def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
+    # 指定身份：sysrole | client | staff(被测)
     user = User.query.filter_by(email=data['email']).first()
     if not user:
         new_user = User()
         data = request.json
-        wj2o(new_user, data)
-        save_changes(new_user)
-        return generate_token(new_user)
+        if str(data['sysrole']) != 'sysrole' and str(data['sysrole']) != 'client' and str(data['sysrole']) != 'staff':
+            print(data['sysrole'])
+            return {
+                'status': 'fail',
+                'message': 'no such role. please choose between:sysrole/client/staff'
+            }
+        else:
+            if str(data['sysrole']) == 'sysrole':
+                new_user.orgid = 0
+            wj2o(new_user, data)
+            save_changes(new_user)
+            return generate_token(new_user)
     else:
         response_object = {
             'status': 'fail',
@@ -30,6 +42,30 @@ def get_all_users():
 
 def get_a_user(id):
     return User.query.filter_by(id=id).first()
+
+def get_project_all_users(id):
+    if Project.query.filter_by(id=id).first():
+        org_id = Project.query.filter_by(id=id).first().orgid
+        print('orgid',org_id)
+        if org_id:
+            users = User.query.filter_by(orgid=org_id, sysrole='staff').all()
+            if users:
+                return users, 200
+            else:
+                return {
+                    'status': 'fail',
+                    'message': 'no such user, please check the sysrole'
+                },404
+        else:
+            return {
+                'message': 'no such orgid',
+                'status': 'fail'
+            },404
+    else:
+        return {
+            'message': 'no such project id',
+            'status': 'fail'
+        },404
 
 
 def generate_token(user: User) -> Tuple[Dict[str, str], int]:

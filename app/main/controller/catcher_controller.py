@@ -28,12 +28,6 @@ class Servercatchers(Resource):
         """您可以在这里展示所有的sever catcher"""
         return get_all_catchers()
 
-    @ns.doc('get_all_catcher_id')
-    # @ns.marshal_list_with(_CatcherOut, envelope='children')
-    def get(self):
-        """您可以在这里查看已有的catcher的id"""
-        return get_all_catcher_ids()
-
     @ns.expect(_CatcherIn, validate=True)
     @ns.response(201, 'new sever catcher successfully created.')
     @ns.doc('create a new catcher')

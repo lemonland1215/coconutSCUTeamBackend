@@ -18,10 +18,6 @@ def get_all_mail_templates():
 def get_a_mail_template(id):
     return Mailtemplate.query.filter_by(id=id).first(), 201
 
-def get_all_mail_ids():
-    mails = Mailtemplate.query.all()
-    mail_ids = [mail.id for mail in mails]
-    return mail_ids, 201
 
 @jwt_required()
 def save_new_mail_template(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:

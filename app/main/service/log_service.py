@@ -25,3 +25,11 @@ def save_log(type, userid, description):
     login.time = datetime.now()
     db.session.add(login)
     db.session.commit()
+
+
+def get_a_log(id):
+    tmp_log = db.session.query(Log.id, Log.type, Log.operator_id, User.username.label('operator'), Log.role,
+                               Log.details,
+                               Log.time). \
+        outerjoin(User, Log.operator_id == User.id).filter(Log.id == id)
+    return tmp_log.first()

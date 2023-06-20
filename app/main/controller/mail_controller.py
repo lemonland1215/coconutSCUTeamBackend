@@ -28,10 +28,6 @@ class MailTemplates(Resource):
         """List all mail templates"""
         return get_all_mail_templates()
 
-    @ns.doc('get_all_mail_id')
-    def get(self):
-        """您可以在这里查看已有的mail_template的id"""
-        return get_all_mail_ids()
 
     @ns.expect(_htmlTemplateIn, validate=True)
     @ns.response(201, 'Template successfully created.')

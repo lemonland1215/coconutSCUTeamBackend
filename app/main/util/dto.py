@@ -198,7 +198,7 @@ class Task_DTO:
         'target_num': fields.Integer(required=False, descripition='target num'),
         'target_id_list': fields.String(required=True, description='target list'),
         'delivery_name': fields.String(required=True, description='the name of the person that deliver the mail'),
-        # 'delivery_time': fields.DateTime(required=False, description='发件时间'),
+        'delivery_time': fields.DateTime(required=False, description='发件时间'),
         'delivery_address': fields.String(required=True, description='the address of the delivery, like:deliver@mail'),
         'delivery_freq': fields.Integer(required=True, description='the frequency of the sending mails'),
         'mail_server_id': fields.Integer(required=True, description='server id'),

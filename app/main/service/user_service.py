@@ -15,18 +15,36 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     if not user:
         new_user = User()
         data = request.json
+        wj2o(new_user, data)
+        print("1")
         if str(data['sysrole']) != 'sysrole' and str(data['sysrole']) != 'client' and str(data['sysrole']) != 'staff':
             print(data['sysrole'])
+            print("2")
             return {
                 'status': 'fail',
                 'message': 'no such role. please choose between:sysrole/client/staff'
             },404
         else:
             if str(data['sysrole']) == 'sysrole':
+                print("3")
+                # wj2o(new_user, data)
                 new_user.orgid = 0
-            wj2o(new_user, data)
-            save_changes(new_user)
-            return generate_token(new_user)
+                save_changes(new_user)
+                return generate_token(new_user)
+            else:
+                print(new_user.orgid)
+                if new_user.orgid == 0:
+                    print("4")
+                    print(type(new_user.orgid))
+                    return {
+                        'status': 'fail',
+                        'message': 'no such org ,org_id should >= 1'
+                    }, 400
+                else:
+                    print("5")
+                    # wj2o(new_user, data)
+                    save_changes(new_user)
+                    return generate_token(new_user)
     else:
         response_object = {
             'status': 'fail',

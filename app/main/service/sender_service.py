@@ -123,48 +123,58 @@ def search_for_senders(data):
     try:
         if data['name']:
             tmp_senders = tmp_senders.filter(Serversender.name.like("%" + data['name'] + "%"))
+            return tmp_senders.all(), 201
     except:
         print("no name")
 
     try:
         if data['server']:
             tmp_senders = tmp_senders.filter(Serversender.server.like("%" + data['server'] + "%"))
+            return tmp_senders.all(), 201
     except:
         print("no server")
 
     try:
         if data['port']:
             tmp_senders = tmp_senders.filter_by(port=data['port'])
+            return tmp_senders.all(), 201
     except:
         print("no port")
 
     try:
         if data['encryptalg']:
             tmp_senders = tmp_senders.filter(Serversender.encryptalg.like("%" + data['encryptalg'] + "%"))
+            return tmp_senders.all(), 201
     except:
         print("no server")
 
     try:
         if data['status']:
             tmp_senders = tmp_senders.filter(Serversender.status.like("%" + data['status'] + "%"))
+            return tmp_senders.all(), 201
     except:
         print("no such status")
 
     try:
         if data['isfrozen']:
             tmp_senders = tmp_senders.filter_by(isfrozen=data['isfrozen'])
+            return tmp_senders.all(), 201
     except:
         print("no isfrozen")
 
     try:
         if data['islocked']:
             tmp_senders = tmp_senders.filter_by(islocked=data['islocked'])
+            return tmp_senders.all(), 201
     except:
         print("no isfrozen")
 
     # print(tmp_tasks.all())
     # print(tmp_projects.all())
-    return tmp_senders.all(), 201
+    return {
+        "code": "fail",
+        "message": "no such search object"
+    },400
 
 def save_changes(data: Serversender) -> None:
     db.session.add(data)

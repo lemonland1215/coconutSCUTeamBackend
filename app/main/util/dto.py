@@ -196,7 +196,7 @@ class Task_DTO:
         # 'catcher_name': fields.String(rrequired=True, descripition='cather server name'),
         'report_status': fields.Boolean(required=False, default=False, description='dose report be generated'),
         # 'project_manager': fields.String(required=True, description='task manager name(yifang)'),
-        'target_num': fields.Integer(required=False, descripition='target num'),
+        # 'target_num': fields.Integer(required=False, descripition='target num'),
         'target_id_list': fields.String(required=True, default='[2]', description='target list'),
         'delivery_name': fields.String(required=True, description='the name of the person that deliver the mail'),
         'delivery_time': fields.String(required=False, default='2023-06-20 09:47:30.889212', description='发件时间'),

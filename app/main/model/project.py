@@ -33,9 +33,9 @@ class Project(db.Model):
     def init_db():
         project = Project()
         project.projectname = 'stafelring'
-        project.project_manager_id = 15
+        project.project_manager_id = 2
         project.project_creator_id = 1
-        project.orgid = 2
+        project.orgid = 1
         project.customer_contact = 'stdlring'
         project.contact_email = 'mail@mail'
         project.liaison_id = 1

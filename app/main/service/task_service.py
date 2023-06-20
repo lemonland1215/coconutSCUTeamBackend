@@ -14,6 +14,7 @@ from app.main.util.response_tip import *
 from flask_mail import Mail, Message
 from extention import app
 import json
+import ast
 
 
 running_jobs = {}
@@ -37,6 +38,7 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                         date_format = '%Y-%m-%d %H:%M:%S.%f'
                         date_time = datetime.strptime(new_task.delivery_time, date_format)
                         new_task.delivery_time = date_time
+                        new_task.target_num = len(eval(str(new_task.target_id_list)))
                         if date_time < datetime.now():
                             return {
                                 "code": "timeisnotallowed",

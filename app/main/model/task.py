@@ -1,5 +1,8 @@
 from .. import db
 from datetime import datetime
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.expression import Insert
+from sqlalchemy import event
 
 
 class Task(db.Model):
@@ -59,3 +62,15 @@ class Task(db.Model):
 
         db.session.add(task)
         db.session.commit()
+
+# def compile_insert(insert, compiler, **kwargs):
+#     if insert.parameters is not None and 'target_id_list' in insert.parameters:
+#         insert = insert.with_values({'target_num': len(insert.parameters['target_id_list'])})
+#     return compiler.visit_insert(insert)
+#
+# # 监听模型类的insert事件，在插入数据前设置默认值
+# @event.listens_for(Task, 'before_insert')
+# def set_default_values(mapper, connection, task):
+#     if task.target_id_list is not None:
+#         task.target_num = len(task.target_id_list)
+#         print(len(task.target_id_list))

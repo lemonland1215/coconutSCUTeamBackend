@@ -161,7 +161,7 @@ class Project_DTO:
 
     updateIn = ns.model('project_Update', {
         'project_name': fields.String(required=False, description='name'),
-        'project_manager': fields.String(required=True, default="cyb", description='甲方负责人'),
+        'project_manager_name': fields.String(required=False, default="cyb", description='甲方负责人'),
         # 'project_manager_id': fields.String(required=False, description='project_manager_id'),
         'comment': fields.String(required=False, description='sysrole')
     })
@@ -177,8 +177,8 @@ class Project_DTO:
         'organization_name': fields.String(required=False, description='organization_name'),
         'is_locked': fields.Boolean(required=False, description='is_locked'),
         'is_frozen': fields.Boolean(required=False, description='is_frozen'),
-        'create_time': CustomDate(required=False, dt_format='str_time', description='create_time'),
-        'modified_time': CustomDate(required=False, dt_format='str_time', description='modified_time')
+        'create_time': CustomDate(required=False, default=datetime.now(), dt_format='str_time', description='create_time'),
+        'modified_time': CustomDate(required=False, default=datetime.now(), dt_format='str_time', description='modified_time')
     })
 
 

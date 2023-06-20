@@ -286,7 +286,7 @@ def update_a_task(id):
                     'code': 'success',
                     'message': f'Task {id} updated!'.format()
                 }
-                details = " update task " + id
+                details = " update task " + str(id)
                 return response_object, 201
 
 
@@ -384,7 +384,7 @@ def operate_a_task(tid, operator):
         'code': 'success',
         'message': f'task {tid} safely updated!'.format()
     }
-    details = " " + operator + " task " + id
+    details = " " + operator + " task " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 

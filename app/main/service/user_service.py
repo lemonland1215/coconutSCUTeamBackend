@@ -165,7 +165,7 @@ def operate_a_user(id, operator):
         'code': 'success',
         'message': f'User {id} {operator}!'.format().format()
     }
-    details = " " + operator + " user " + id
+    details = " " + operator + " user " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 

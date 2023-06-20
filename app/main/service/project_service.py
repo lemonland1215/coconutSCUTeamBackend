@@ -175,7 +175,7 @@ def operate_a_project(id, operator):
             'code': 'success',
             'message': f'project {id} {operator}!'.format().format()
         }
-        details = " " + operator + " project " + id
+        details = " " + operator + " project " + str(id)
         save_log("Modify", get_jwt_identity(), details)
         return response_object, 201
     else:
@@ -312,7 +312,7 @@ def update_a_project(id):
             'code': 'success',
             'message': f'project {id} updated!'.format()
         }
-        details = " update project " + id
+        details = " update project " + str(id)
         save_log("Modify", get_jwt_identity(), details)
         return response_object, 201
     else:

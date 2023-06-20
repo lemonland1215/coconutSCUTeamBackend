@@ -11,13 +11,21 @@ from datetime import datetime
 
 
 def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
+    # 指定身份：sysrole | client | staff(被测)
     user = User.query.filter_by(email=data['email']).first()
     if not user:
         new_user = User()
         data = request.json
-        wj2o(new_user, data)
-        save_changes(new_user)
-        return generate_token(new_user)
+        if str(data['sysrole']) != 'sysrole' and str(data['sysrole']) != 'client' and str(data['sysrole']) != 'staff':
+            print(data['sysrole'])
+            return {
+                'status': 'fail',
+                'message': 'no such role. please choose between:sysrole/client/staff'
+            }
+        else:
+            wj2o(new_user, data)
+            save_changes(new_user)
+            return generate_token(new_user)
     else:
         response_object = {
             'status': 'fail',
@@ -37,13 +45,13 @@ def get_project_all_users(id):
     org_id = Project.query.filter_by(id=id).first().orgid
     print('orgid',org_id)
     if org_id:
-        users = User.query.filter_by(orgid=org_id).all()
+        users = User.query.filter_by(orgid=org_id , sysrole='client').all()
         if users:
             return users, 200
         else:
             return {
                 'status':'fail',
-                'message':'no such user'
+                'message':'no such user, please check the sysrole'
             }
     else:
         return {

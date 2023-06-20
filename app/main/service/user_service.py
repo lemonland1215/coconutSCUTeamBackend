@@ -45,7 +45,7 @@ def get_project_all_users(id):
     org_id = Project.query.filter_by(id=id).first().orgid
     print('orgid',org_id)
     if org_id:
-        users = User.query.filter_by(orgid=org_id , sysrole='client').all()
+        users = User.query.filter_by(orgid=org_id , sysrole='staff').all()
         if users:
             return users, 200
         else:

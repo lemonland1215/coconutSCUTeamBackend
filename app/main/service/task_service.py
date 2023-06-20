@@ -104,12 +104,14 @@ def search_for_tasks(data):
         if data['id']:
             print(data['id'])
             tmp_tasks = tmp_tasks.filter_by(id=data['id'])
+            return tmp_tasks.all(), 201
     except:
         print("没有是这个编号的任务哦")
 
     try:
         if data['name']:
             tmp_tasks = tmp_tasks.filter(Task.name.like("%" + data['name'] + "%"))
+            return tmp_tasks.all(), 201
     except:
         print("没有是这个名称的任务哦")
 
@@ -117,7 +119,8 @@ def search_for_tasks(data):
         if data['create_time_begin'] and data['create_time_end']:
             tmp_tasks = tmp_tasks.filter(
                 Task.createtime.between(data['create_time_start'], data['create_time_end']))
-            print(tmp_tasks.all())
+            # print(tmp_tasks.all())
+            return tmp_tasks.all(), 201
     except Exception as e:
         print("没有在这个时间区间内创建的任务哦", e)
 
@@ -125,12 +128,14 @@ def search_for_tasks(data):
         if data['modify_time_start'] and data['modify_time_end']:
             tmp_tasks = tmp_tasks.filter(
                 Task.modifytime.between(data['modify_time_start'], data['modify_time_end']))
+            return tmp_tasks.all(), 201
     except:
         print("没有在这个时间区间修改的任务哦")
 
     try:
         if data['project_id']:
             tmp_tasks = tmp_tasks.filter_by(project_id=data['project_id'])
+            return tmp_tasks.all(), 201
     except:
         print("没有是这个项目id的任务哦")
 
@@ -164,12 +169,16 @@ def search_for_tasks(data):
     try:
         if data['isfrozen']:
             tmp_tasks = tmp_tasks.filter_by(status=data['isfrozen'])
+            return tmp_tasks.all(), 201
     except:
         print("没有状态为冻结的任务哦")
 
     # print(tmp_tasks.all())
     # print(tmp_projects.all())
-    return tmp_tasks.all(), 201
+    return {
+        'status': 'fail',
+        'message': '看上去没有搜索任何东西呢'
+    },404
 
 
 @jwt_required()

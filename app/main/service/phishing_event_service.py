@@ -9,6 +9,7 @@ from app.main.util.response_tip import *
 from flask_mail import Mail, Message
 from extention import app
 import json
+from app.main.service.log_service import save_log
 
 running_jobs = {}
 
@@ -24,6 +25,8 @@ def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     data['time'] = datetime.now()
     wj2o(new_event, data)
     save_changes(new_event)
+    details = " save a new event."
+    save_log("Create", get_jwt_identity(), details)
     return response_with(SUCCESS_201)
 
 @jwt_required()

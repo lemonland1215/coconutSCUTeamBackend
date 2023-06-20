@@ -25,10 +25,10 @@ def get_all_projects():
                                    Project.orgid.label('organization_id'), Organization.name.label('organization_name'),
                                    Project.status, Project.comment,
                                    Project.is_frozen,
-                                   case([(Project.frozen_by.isnot(None), Project.frozen_by)], else_=literal("")).label(
+                                   case((Project.frozen_by.isnot(None), Project.frozen_by), else_=literal("")).label(
                                        'frozen_by'),
                                    Project.is_locked,
-                                   case([(Project.locked_by.isnot(None), Project.locked_by)], else_=literal("")).label(
+                                   case((Project.locked_by.isnot(None), Project.locked_by), else_=literal("")).label(
                                        'locked_by'),
                                    Project.modified_time, Project.create_time, Project.end_time). \
         outerjoin(creator, Project.project_creator_id == creator.id). \
@@ -51,7 +51,7 @@ def save_new_project(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     creator_id = get_jwt_identity()
     creator_role = list(db.session.query(User.sysrole).filter_by(id=creator_id).first())[0]
     response_object = {
-        'status': 'fail',
+        'code': 'fail',
         'message': 'project already exists!',
     }
     if creator_role == "sysrole":
@@ -67,7 +67,7 @@ def save_new_project(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                     new_project.orgid = list(db.session.query(Organization.id).filter(
                         Organization.name == data['organization_name']).first())[0]
                     save_changes(new_project)
-                    response_object['status'] = 'success'
+                    response_object['code'] = 'success'
                     response_object['message'] = 'project created!'
                     save_log("Create", get_jwt_identity(), " create a project.")
                     return response_object, 201
@@ -82,7 +82,7 @@ def save_new_project(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
             return response_object, 409
     else:
         response_object['message'] = 'you are not the sysrole!'
-        return response_object, 403
+        return response_object, 401
 
 
 def delete_projects():
@@ -96,7 +96,7 @@ def delete_projects():
         save_log("Delete", get_jwt_identity(), " delete all projects!")
         return f"delete success", 201
     else:
-        return f"no permission", 403
+        return f"no permission", 401
 
 
 def get_a_project(id):
@@ -109,10 +109,10 @@ def get_a_project(id):
                                    Project.orgid.label('organization_id'), Organization.name.label('organization_name'),
                                    Project.status, Project.comment,
                                    Project.is_frozen,
-                                   case([(Project.frozen_by.isnot(None), Project.frozen_by)], else_=literal("")).label(
+                                   case((Project.frozen_by.isnot(None), Project.frozen_by), else_=literal("")).label(
                                        'frozen_by'),
                                    Project.is_locked,
-                                   case([(Project.locked_by.isnot(None), Project.locked_by)], else_=literal("")).label(
+                                   case((Project.locked_by.isnot(None), Project.locked_by), else_=literal("")).label(
                                        'locked_by'),
                                    Project.modified_time, Project.create_time, Project.end_time). \
         outerjoin(creator, Project.project_creator_id == creator.id). \
@@ -147,7 +147,7 @@ def operate_a_project(id, operator):
                 db.session.delete(tmp_project)
             elif operator == "freeze":
                 tmp_project.is_frozen = True
-                tmp_project.status = "Froze"
+                tmp_project.status = "Frozen"
                 tmp_project.frozen_time = datetime.now()
                 tmp_project.modified_time = datetime.now()
                 tmp_project.frozen_by = get_jwt_identity()
@@ -160,8 +160,8 @@ def operate_a_project(id, operator):
             elif operator == "Running":
                 tmp_project.status = "Running"
                 tmp_project.modified_time = datetime.now()
-            elif operator == "Froze":
-                tmp_project.status = "Froze"
+            elif operator == "Frozen":
+                tmp_project.status = "Frozen"
                 tmp_project.modified_time = datetime.now()
             elif operator == "Finish":
                 tmp_project.status = "Finish"
@@ -180,7 +180,7 @@ def operate_a_project(id, operator):
         save_log("Modify", get_jwt_identity(), details)
         return response_object, 201
     else:
-        return f"no permission", 403
+        return f"no permission", 401
 
 
 def search_for_project(data):
@@ -193,10 +193,10 @@ def search_for_project(data):
                                    Project.orgid.label('organization_id'), Organization.name.label('organization_name'),
                                    Project.status, Project.comment,
                                    Project.is_frozen,
-                                   case([(Project.frozen_by.isnot(None), Project.frozen_by)], else_=literal("")).label(
+                                   case((Project.frozen_by.isnot(None), Project.frozen_by), else_=literal("")).label(
                                        'frozen_by'),
                                    Project.is_locked,
-                                   case([(Project.locked_by.isnot(None), Project.locked_by)], else_=literal("")).label(
+                                   case((Project.locked_by.isnot(None), Project.locked_by), else_=literal("")).label(
                                        'locked_by'),
                                    Project.modified_time, Project.create_time, Project.end_time). \
         outerjoin(creator, Project.project_creator_id == creator.id). \
@@ -313,11 +313,12 @@ def update_a_project(id):
             'code': 'success',
             'message': f'project {id} updated!'.format()
         }
-        details = " update project " + id + "."
+        details = " update project " + id
         save_log("Modify", get_jwt_identity(), details)
         return response_object, 201
     else:
-        return f"no permission", 403
+        return f"no permission", 401
+
 
 def get_projects_by_org_id(id):
     projects = Project.query.filter_by(orgid=id).all()

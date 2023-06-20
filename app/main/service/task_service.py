@@ -15,6 +15,7 @@ from flask_mail import Mail, Message
 from extention import app
 import json
 import ast
+from app.main.service.log_service import save_log
 
 
 running_jobs = {}
@@ -53,7 +54,8 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                                                     'sendlist': [], 'retry': 0}
                             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                               seconds=new_task.delivery_freq, start_date=new_task.delivery_time)
-
+                            details = " create a new task."
+                            save_log("Create", get_jwt_identity(), details)
                             return response_with(SUCCESS_201)
                     else:
                         return {
@@ -284,6 +286,7 @@ def update_a_task(id):
                     'code': 'success',
                     'message': f'Task {id} updated!'.format()
                 }
+                details = " update task " + id
                 return response_object, 201
 
 
@@ -372,6 +375,8 @@ def operate_a_task(tid, operator):
         'code': 'success',
         'message': f'task {tid} safely updated!'.format()
     }
+    details = " " + operator + " task " + id
+    save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 
 def send_mails(job_id):

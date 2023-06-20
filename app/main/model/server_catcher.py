@@ -10,6 +10,7 @@ class Servercatcher(db.Model):
     name = db.Column(db.String(50), nullable=False, comment='捕获用服务器名称')
     server = db.Column(db.String(15),nullable=False, comment='IP地址')
     port = db.Column(db.INTEGER, nullable=False, comment='端口号')
+    status = db.Column(db.String(50),nullable=False, default='open', comment='捕获服务器状态：open | close | busy')
     islocked = db.Column(db.BOOLEAN, nullable=False, comment='是否锁定')
     isfrozen = db.Column(db.BOOLEAN, nullable=False, comment='是否冻结')
     createdbyuid = db.Column(db.INTEGER, nullable=False, comment='创建人编号')
@@ -27,8 +28,8 @@ class Servercatcher(db.Model):
     def init_db():
         catcher = Servercatcher()
         catcher.name = 'ran'
-        catcher.server = '0.0.0.0'
-        catcher.port = 50
+        catcher.server = '192.168.43.76'
+        catcher.port = 5004
         catcher.islocked = 0
         catcher.isfrozen = 0
         catcher.createdbyuid = 1

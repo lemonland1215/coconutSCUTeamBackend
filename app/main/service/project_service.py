@@ -3,7 +3,6 @@ from app.main import db
 from app.main.model.project import Project
 from app.main.model.user import User
 from app.main.model.organization import Organization
-from app.main.model.liaison import Liaison
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o

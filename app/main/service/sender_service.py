@@ -96,6 +96,18 @@ def operate_a_sender(id, operator):
             tmp_sender.isfrozen = False
             tmp_sender.freezetime = None
             tmp_sender.frozenbyuid = None
+        elif operator == "open":
+            print("here 1")
+            if tmp_sender.status != 'close':
+                print('here 2')
+                return response_with(ITEM_STATUS_400)
+            else:
+                tmp_sender.status = 'open'
+        elif operator == "close":
+            if tmp_sender.status != 'open':
+                return response_with(ITEM_STATUS_400)
+            else:
+                tmp_sender.status = 'close'
         else:
             print("有问题，你再看看你的操作呢")
             return response_with(INVALID_INPUT_422)
@@ -130,6 +142,12 @@ def search_for_senders(data):
             tmp_senders = tmp_senders.filter(Serversender.encryptalg.like("%" + data['encryptalg'] + "%"))
     except:
         print("no server")
+
+    try:
+        if data['status']:
+            tmp_senders = tmp_senders.filter(Serversender.status.like("%" + data['status'] + "%"))
+    except:
+        print("no such status")
 
     try:
         if data['isfrozen']:

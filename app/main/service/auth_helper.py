@@ -89,7 +89,9 @@ class Auth:
                     response_object = {
                         'status': 'success',
                         'message': 'Successfully logged in.',
-                        'Authorization': auth_token
+                        'Authorization': auth_token,
+                        'sysrole': user.sysrole,
+                        'name':user.username
                     }
                     session['userid'] = list(db.session.query(User.id).filter(User.email == data.get('email')).first())[0]
                     save_log("Login", session['userid'], " login.")

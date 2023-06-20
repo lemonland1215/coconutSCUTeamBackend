@@ -101,6 +101,6 @@ class SearchForCatchers(Resource):
     @ns.marshal_list_with(_CatcherOut, envelope='children')
     @ns.expect(_catcher_Search, validate=True)
     def post(self):
-        """您可以在这里搜索以下内容：name | server | port | isfrozen | islocked"""
+        """您可以在这里搜索以下内容：name | server | port | isfrozen | status | islocked"""
         data = request.json
         return search_for_catchers(data)

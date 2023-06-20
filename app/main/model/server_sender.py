@@ -12,6 +12,7 @@ class Serversender(db.Model):
     port = db.Column(db.INTEGER, nullable=False, comment='端口号')
     encryptalg = db.Column(db.String(50), nullable=False, comment='加密算法')
     password = db.Column(db.String(50), nullable=False, comment='密码')
+    status = db.Column(db.String(50), nullable=False, default='open', comment='发送服务器状态：open | close | busy')
     islocked = db.Column(db.BOOLEAN, nullable=False, comment='是否锁定')
     isfrozen = db.Column(db.BOOLEAN, nullable=False, comment='是否冻结')
     createdbyuid = db.Column(db.INTEGER, nullable=False, comment='创建人编号')

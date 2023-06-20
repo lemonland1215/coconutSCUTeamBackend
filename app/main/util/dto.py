@@ -343,6 +343,7 @@ class Sender_DTO:
         'name': fields.String(description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
+        'status': fields.String(description='发送服务器状态'),
         'encryptalg': fields.String(description='加密算法'),
         'isfrozen': fields.Boolean(description='冻没'),
         'freezetime': fields.DateTime(description='冻结时间'),
@@ -358,6 +359,7 @@ class Sender_DTO:
         'name': fields.String(description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
+        'status': fields.String(description='发送服务器状态'),
         'encryptalg': fields.String(description='加密算法'),
         'isfrozen': fields.Boolean(description='冻没'),
         'islocked': fields.Boolean(description='锁没')
@@ -367,6 +369,7 @@ class Sender_DTO:
         'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
+        # 'status': fields.String(description='发送服务器状态'),
         'encryptalg': fields.String(description='加密算法'),
         'password': fields.String(description='密码')
     })
@@ -391,6 +394,7 @@ class Catcher_DTO:
         'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
+        'status': fields.String(description='捕获服务器状态'),
         'isfrozen': fields.Boolean(description='冻没'),
         'freezetime': fields.DateTime(description='冻结时间'),
         'islocked': fields.Boolean(description='锁没'),
@@ -408,6 +412,7 @@ class Catcher_DTO:
         'name': fields.String(description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
+        'status': fields.String(description='捕获服务器状态'),
         'isfrozen': fields.Boolean(description='冻没'),
         'islocked': fields.Boolean(description='锁没')
     })
@@ -416,6 +421,7 @@ class Catcher_DTO:
         'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
+        # 'status': fields.String(description='捕获服务器状态'),
     })
 
 

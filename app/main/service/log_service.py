@@ -2,7 +2,6 @@ from flask import request
 from app.main import db
 from app.main.model.log import Log
 from app.main.model.user import User
-from app.main.model.liaison import Liaison
 from app.main.model.organization import Organization
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required

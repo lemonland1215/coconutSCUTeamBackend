@@ -97,6 +97,16 @@ def operate_a_catcher(id, operator):
             tmp_catcher.isfrozen = False
             tmp_catcher.freezetime = None
             tmp_catcher.frozenbyuid = None
+        elif operator == "open":
+            if tmp_catcher.status != 'close':
+                return response_with(ITEM_STATUS_400)
+            else:
+                tmp_catcher.status = 'open'
+        elif operator == "close":
+            if tmp_catcher.status != 'open':
+                return response_with(ITEM_STATUS_400)
+            else:
+                tmp_catcher.status = 'close'
         else:
             print("有问题，你再看看你的操作呢")
             return response_with(INVALID_INPUT_422)

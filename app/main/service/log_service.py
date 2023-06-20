@@ -15,3 +15,14 @@ def get_all_logs():
                          Log.time).\
         outerjoin(User, Log.operator_id == User.id)
     return tmp_log.all()
+
+
+def save_log(type, userid, description):
+    login = Log()
+    login.type = type
+    login.operator_id = userid
+    login.role = list(db.session.query(User.sysrole).filter(User.id == userid).first())[0]
+    login.details = list(db.session.query(User.username).filter(User.id == userid).first())[0] + description
+    login.time = datetime.now()
+    db.session.add(login)
+    db.session.commit()

@@ -2,27 +2,40 @@ from flask import request
 from app.main import db
 from app.main.model.project import Project
 from app.main.model.user import User
-from app.main.model.liaison import Liaison
 from app.main.model.organization import Organization
+from app.main.model.liaison import Liaison
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
 from datetime import datetime
+from sqlalchemy import case, literal
+from app.main.service.log_service import save_log
+
+creator = db.aliased(User)
+manager = db.aliased(User)
 
 
 def get_all_projects():
-    tmp_project = db.session.query(Project.id, Project.projectname, User.username.label('project_manager'),
-                                   Project.customer_contact, Project.contact_email,
-                                   Liaison.liaison_name.label('liaison_name'),
-                                   Liaison.liaison_email.label('liaison_email'), Project.test_number,
-                                   Project.is_frozen, Project.is_locked, Project.comment, Project.status,
-                                   Organization.name.label('organization_name'), Project.create_time,
-                                   Project.modified_time, Project.orgid, Project.liaison_id). \
-        outerjoin(User, Project.project_manager_id == User.id). \
-        outerjoin(Liaison, Project.liaison_id == Liaison.liaison_id). \
-        outerjoin(Organization, Project.orgid == Organization.id)
-    print(tmp_project.all())
-    return tmp_project.all()
+    tmp_project = db.session.query(Project.id, Project.project_name,
+                                   Project.project_creator_id, creator.username.label('project_creator_name'),
+                                   creator.email.label('project_creator_email'),
+                                   Project.client_id.label('project_manager_id'),
+                                   manager.username.label('project_manager_name'),
+                                   manager.email.label('project_manager_email'),
+                                   Project.orgid.label('organization_id'), Organization.name.label('organization_name'),
+                                   Project.status, Project.comment,
+                                   Project.is_frozen,
+                                   case([(Project.frozen_by.isnot(None), Project.frozen_by)], else_=literal("")).label(
+                                       'frozen_by'),
+                                   Project.is_locked,
+                                   case([(Project.locked_by.isnot(None), Project.locked_by)], else_=literal("")).label(
+                                       'locked_by'),
+                                   Project.modified_time, Project.create_time, Project.end_time). \
+        outerjoin(creator, Project.project_creator_id == creator.id). \
+        outerjoin(manager, Project.client_id == manager.id). \
+        outerjoin(Organization, Project.orgid == Organization.id).all()
+    print(tmp_project)
+    return tmp_project, 200
 
 
 def get_all_project_ids():
@@ -30,135 +43,145 @@ def get_all_project_ids():
     project_ids = [project.id for project in projects]
     return project_ids, 201
 
+
 def save_new_project(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
-    project = Project.query.filter_by(projectname=data['projectname']).first()
-    manager_exist = User.query.filter(User.id == data['project_manager_id']).first()
-    liaison_exist = User.query.filter(User.id == data['liaison_id']).first()
-    org_exist = Organization.query.filter(Organization.id == data['orgid']).first()
+    project_exist = Project.query.filter_by(project_name=data['project_name']).first()
+    manager_exist = User.query.filter(User.username == data['project_manager']).filter(User.sysrole == "client").first()
+    org_exist = Organization.query.filter(Organization.name == data['organization_name']).first()
+    creator_id = get_jwt_identity()
+    creator_role = list(db.session.query(User.sysrole).filter_by(id=creator_id).first())[0]
     response_object = {
         'status': 'fail',
         'message': 'project already exists!',
     }
-    if not project:
-        if manager_exist:
-            if liaison_exist:
+    if creator_role == "sysrole":
+        if not project_exist:
+            if manager_exist:
                 if org_exist:
                     new_project = Project()
                     data = request.json
                     wj2o(new_project, data)
+                    new_project.client_id = list(db.session.query(User.id).filter(User.username == data['project_manager']).first())[0]
                     new_project.project_creator_id = get_jwt_identity()
-                    new_project.orgname = \
-                        list(db.session.query(Organization.name).filter(Organization.id == data['orgid']).first())[0]
-                    print(data['liaison_id'])
-                    liaison = db.session.query(Liaison).filter(Liaison.liaison_id == data['liaison_id']).first()
-                    if not liaison:
-                        new_liaison = Liaison()
-                        new_liaison.liaison_id = data['liaison_id']
-                        user = list(
-                            db.session.query(User.username, User.email).filter(User.id == data['liaison_id']).first())
-                        new_liaison.liaison_name = user[0]
-                        new_liaison.liaison_email = user[1]
-                        save_changes(new_liaison)
+                    new_project.orgid = list(db.session.query(Organization.id).filter(Organization.name == data['organization_name']).first())[0]
                     save_changes(new_project)
                     response_object['status'] = 'success'
                     response_object['message'] = 'project created!'
+                    save_log("Create", get_jwt_identity(), " create a project.")
                     return response_object, 201
                     # return generate_token(new_project)
                 else:
                     response_object['message'] = 'no such organization!'
                     return response_object, 404
             else:
-                response_object['message'] = 'no such liaison!'
+                response_object['message'] = 'no such client manager!'
                 return response_object, 404
         else:
-            response_object['message'] = 'no such manager!'
-            return response_object, 404
+            return response_object, 409
     else:
-        return response_object, 409
+        response_object['message'] = 'you are not the sysrole!'
+        return response_object, 403
 
 
 def delete_projects():
-    project = Project.query.all()
-    liaison = Liaison.query.all()
-    for tmp_project in project:
-        db.session.delete(tmp_project)
-    for tmp_liaison in liaison:
-        db.session.delete(tmp_liaison)
-    db.session.commit()
-    return f"delete success", 201
+    operator_id = get_jwt_identity()
+    operator_role = list(db.session.query(User.sysrole).filter_by(id=operator_id).first())[0]
+    if operator_role == "sysrole" or operator_role == "client":
+        project = Project.query.all()
+        for tmp_project in project:
+            db.session.delete(tmp_project)
+        db.session.commit()
+        save_log("Delete", get_jwt_identity(), " delete all projects!")
+        return f"delete success", 201
+    else:
+        return f"no permission", 403
 
 
 def get_a_project(id):
-    tmp_project = db.session.query(Project.id, Project.projectname, User.username.label('project_manager'),
-                                   Project.customer_contact, Project.contact_email,
-                                   Liaison.liaison_name.label('liaison_name'),
-                                   Liaison.liaison_email.label('liaison_email'), Project.test_number,
-                                   Project.is_frozen, Project.is_locked, Project.comment, Project.status,
-                                   Organization.name.label('organization_name'),
-                                   Project.create_time, Project.modified_time, Project.orgid, Project.liaison_id). \
-        outerjoin(User, Project.project_manager_id == User.id). \
-        outerjoin(Liaison, Project.liaison_id == Liaison.liaison_id). \
-        outerjoin(Organization, Project.orgid == Organization.id). \
+    tmp_project = db.session.query(Project.id, Project.project_name,
+                                   Project.project_creator_id, creator.username.label('project_creator_name'),
+                                   creator.email.label('project_creator_email'),
+                                   Project.client_id.label('project_manager_id'),
+                                   manager.username.label('project_manager_name'),
+                                   manager.email.label('project_manager_email'),
+                                   Project.orgid.label('organization_id'), Organization.name.label('organization_name'),
+                                   Project.status, Project.comment,
+                                   Project.is_frozen,
+                                   case([(Project.frozen_by.isnot(None), Project.frozen_by)], else_=literal("")).label(
+                                       'frozen_by'),
+                                   Project.is_locked,
+                                   case([(Project.locked_by.isnot(None), Project.locked_by)], else_=literal("")).label(
+                                       'locked_by'),
+                                   Project.modified_time, Project.create_time, Project.end_time). \
+        outerjoin(creator, Project.project_creator_id == creator.id). \
+        outerjoin(manager, Project.client_id == manager.id). \
+        outerjoin(Organization, Project.orgid == Organization.id).\
         filter(Project.id == id).first()
-    print(tmp_project)
     return tmp_project
 
 
 def operate_a_project(id, operator):
+    operator_id = get_jwt_identity()
+    operator_role = list(db.session.query(User.sysrole).filter_by(id=operator_id).first())[0]
     tmp_project = Project.query.filter_by(id=id).first()
-    if not tmp_project:
-        return "ITEM_NOT_EXISTS", 404
-    if tmp_project.is_locked:
-        if operator == "lock":
-            return "ITEM ALREADY LOCKED!", 200
-        elif operator != "unlock":
-            return "ITEM_LOCKED", 401
+    if operator_role == "sysrole" or operator_role == "client":
+        if not tmp_project:
+            return "ITEM_NOT_EXISTS", 404
+        if tmp_project.is_locked:
+            if operator == "lock":
+                return "ITEM ALREADY LOCKED!", 200
+            elif operator != "unlock":
+                return "ITEM_LOCKED", 401
+            else:
+                tmp_project.is_locked = False
+                tmp_project.locked_time = None
+                tmp_project.locked_by = None
         else:
-            tmp_project.is_locked = False
-            tmp_project.locked_time = None
-            tmp_project.locked_by = None
+            if operator == "lock":
+                tmp_project.is_locked = True
+                tmp_project.locked_time = datetime.now()
+                tmp_project.locked_by = get_jwt_identity()
+            elif operator == "delete":
+                db.session.delete(tmp_project)
+            elif operator == "freeze":
+                tmp_project.is_frozen = True
+                tmp_project.status = "Froze"
+                tmp_project.frozen_time = datetime.now()
+                tmp_project.modified_time = datetime.now()
+                tmp_project.frozen_by = get_jwt_identity()
+            elif operator == "unfreeze":
+                tmp_project.is_frozen = False
+                tmp_project.status = "Running"
+                tmp_project.frozen_time = None
+                tmp_project.modified_time = datetime.now()
+                tmp_project.frozen_by = None
+            elif operator == "Running":
+                tmp_project.status = "Running"
+                tmp_project.modified_time = datetime.now()
+            elif operator == "Froze":
+                tmp_project.status = "Froze"
+                tmp_project.modified_time = datetime.now()
+            elif operator == "Finish":
+                tmp_project.status = "Finish"
+                tmp_project.modified_time = datetime.now()
+            elif operator == "Stop":
+                tmp_project.status = "Stop"
+                tmp_project.modified_time = datetime.now()
+            elif operator == "unlock":
+                return "ALREADY UNLOCKED!", 200
+            else:
+                print("什么东西")
+                return "INVALID_INPUT", 422
+        db.session.commit()
+        response_object = {
+            'code': 'success',
+            'message': f'project {id} {operator}!'.format().format()
+        }
+        details = " " + operator + " project " + id
+        save_log("Modify", get_jwt_identity(), details)
+        return response_object, 201
     else:
-        if operator == "lock":
-            tmp_project.is_locked = True
-            tmp_project.locked_time = datetime.now()
-            tmp_project.locked_by = get_jwt_identity()
-        elif operator == "delete":
-            db.session.delete(tmp_project)
-        elif operator == "freeze":
-            tmp_project.is_frozen = True
-            tmp_project.status = "Pause"
-            tmp_project.frozen_time = datetime.now()
-            tmp_project.modified_time = datetime.now()
-            tmp_project.frozen_by = get_jwt_identity()
-        elif operator == "unfreeze":
-            tmp_project.is_frozen = False
-            tmp_project.status = "Running"
-            tmp_project.frozen_time = None
-            tmp_project.modified_time = datetime.now()
-            tmp_project.frozen_by = None
-        elif operator == "Running":
-            tmp_project.status = "Running"
-            tmp_project.modified_time = datetime.now()
-        elif operator == "Pause":
-            tmp_project.status = "Pause"
-            tmp_project.modified_time = datetime.now()
-        elif operator == "Finish":
-            tmp_project.status = "Finish"
-            tmp_project.modified_time = datetime.now()
-        elif operator == "Stop":
-            tmp_project.status = "Stop"
-            tmp_project.modified_time = datetime.now()
-        elif operator == "unlock":
-            return "ALREADY UNLOCKED!", 200
-        else:
-            print("什么东西")
-            return "INVALID_INPUT", 422
-    db.session.commit()
-    response_object = {
-        'code': 'success',
-        'message': f'project {id} {operator}!'.format().format()
-    }
-    return response_object, 201
+        return f"no permission", 403
 
 
 def search_for_project(data):

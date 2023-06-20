@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from flask import request, session
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity
 from app.main.model.user import User
-from app.main.model.log import Log
+from app.main.service.log_service import save_log
 from app.main.model.auth import TokenBlocklist
 from app.main import *
 from typing import Dict, Tuple
@@ -91,15 +91,8 @@ class Auth:
                         'message': 'Successfully logged in.',
                         'Authorization': auth_token
                     }
-                    login = Log()
-                    login.type = "Login"
                     session['userid'] = list(db.session.query(User.id).filter(User.email == data.get('email')).first())[0]
-                    login.operator_id = session['userid']
-                    login.role = list(db.session.query(User.sysrole).filter(User.id == session['userid']).first())[0]
-                    login.details = str(login.operator_id) + " login"
-                    login.time = datetime.now()
-                    db.session.add(login)
-                    db.session.commit()
+                    save_log("Login", session['userid'], " login.")
                     return response_object, 200
             else:
                 response_object = {
@@ -128,14 +121,7 @@ class Auth:
         if auth_token:
             # resp = User.decode_auth_token(auth_token)
             print("resp:", auth_token)
-            logout = Log()
-            logout.type = "Logout"
-            logout.operator_id = session.get('userid')
-            logout.role = list(db.session.query(User.sysrole).filter(User.id == session.get('userid')).first())[0]
-            logout.details = str(logout.operator_id) + " logout"
-            logout.time = datetime.now()
-            db.session.add(logout)
-            db.session.commit()
+            save_log("Logout", session.get('userid'), " logout.")
 
             # if isinstance(resp, str):
             # mark the token as blacklisted

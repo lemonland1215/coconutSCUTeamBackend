@@ -23,10 +23,10 @@ class ProjectList(Resource):
         """List all created projects"""
         return get_all_projects()
 
-    @ns.doc('get_all_project_ids')
-    def get(self):
-        """您可以在这里查看已有的project的id"""
-        return get_all_project_ids()
+    # @ns.doc('get_all_project_ids')
+    # def get(self):
+    #     """您可以在这里查看已有的project的id"""
+    #     return get_all_project_ids()
 
     @jwt_required()
     @ns.expect(_project_In, validate=True)

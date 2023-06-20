@@ -292,7 +292,7 @@ def send_mails(job_id):
                 tmp_user = User.query.filter_by(id=next_uid).first()
                 tmp_em = tmp_user.email
                 tmp_name = tmp_user.username
-                user = {'name': tmp_name, 'id': next_uid}
+                user = {'name': tmp_name, 'uid': next_uid, 'tid': running_jobs[job_id]['tid']}
                 content = render_template_string(content, user=user)
                 print(content)
                 send_mail(tmp_em, tmp_name, subject, content)
@@ -323,7 +323,7 @@ def save_changes(data: Task) -> None:
 def send_mail(to_addr, name, subject, context):
     mail = Mail()
     with app.app_context():
-        msg = Message("qqHello " + name +subject, recipients=[to_addr])
+        msg = Message("qqHello " + name + subject, recipients=[to_addr])
         msg.html = context
         mail.send(msg)
 

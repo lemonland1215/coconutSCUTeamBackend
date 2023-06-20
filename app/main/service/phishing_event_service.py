@@ -20,7 +20,8 @@ def get_all_events():
 
 def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     new_event = Phishingevent()
-    data = request.json
+    # data = request.json
+    data['time'] = datetime.now()
     wj2o(new_event, data)
     save_changes(new_event)
     return response_with(SUCCESS_201)
@@ -40,6 +41,12 @@ def search_for_events(data):
             tmp_events = tmp_events.filter_by(catcher_id=data['catcher_id'])
     except:
         print("没有，没有，这里没有这个捕获服务器相关的记录，没有...")
+
+    try:
+        if data['task_id']:
+            tmp_events = tmp_events.filter_by(task_id=data['task_id'])
+    except:
+        print("找啊找，没有这个task相关的内容哦，算不算是另类的欧气呢？")
 
     try:
         if data['server_id']:

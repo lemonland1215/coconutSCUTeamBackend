@@ -14,6 +14,7 @@ from app.main.util.response_tip import *
 from flask_mail import Mail, Message
 from extention import app
 import json
+from app.main.service.log_service import save_log
 
 
 running_jobs = {}

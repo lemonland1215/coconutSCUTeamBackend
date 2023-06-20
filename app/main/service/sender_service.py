@@ -15,7 +15,6 @@ from flask_mail import Mail, Message
 from extention import app
 import json
 
-
 running_jobs = {}
 
 @jwt_required()

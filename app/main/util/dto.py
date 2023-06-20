@@ -31,7 +31,7 @@ searchWordsIn = {
     'id': fields.Integer(required=False, description='id'),
     'username': fields.String(required=False, description='name'),
     'sysrole': fields.String(required=False, description='sysrole'),
-    'is_frozen': fields.String(required=False, description='is_frozen'),
+    'is_frozen': fields.Boolean(required=False, description='is_frozen'),
     'orgid': fields.Integer(required=False, description='orgid')
 }
 
@@ -95,7 +95,7 @@ class User_DTO:
         'id': fields.String(),
         'username': fields.String(),
         'sysrole': fields.String(),
-        'is_frozen': fields.String(),
+        'is_frozen': fields.Boolean(),
         'is_locked': fields.Boolean(),
         'email': fields.String(),
         'orgid': fields.Integer()

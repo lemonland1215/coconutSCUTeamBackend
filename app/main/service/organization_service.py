@@ -8,6 +8,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.main.model.user import User
 from app.main.util.response_tip import *
 from app.main.util.write_json_to_obj import wj2o
+from app.main.service.log_service import save_log
 
 
 @jwt_required()
@@ -19,6 +20,8 @@ def save_new_organization(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
         data['createdbyuid'] = get_jwt_identity()
         wj2o(new_organization, data)
         save_changes(new_organization)
+        details = " create a new organization."
+        save_log("Create", get_jwt_identity(), details)
         return response_with(SUCCESS_201)
     else:
         response_object = {
@@ -100,6 +103,8 @@ def update_an_organization(id):
         'code': 'success',
         'message': f'Organization {id} updated!'.format()
     }
+    details = " update organization " + id
+    save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 
 @jwt_required()
@@ -142,6 +147,8 @@ def operate_an_organization(id, operator):
             return response_with(INVALID_INPUT_422)
     # tmp_projects, http_code = get_projects_by_organization_id(tmp_organization.id)
     # operate_projects(tmp_projects, operator)
+    details = " " + operator + " organization " + id
+    save_log("Modify", get_jwt_identity(), details)
     db.session.commit()
     return response_with(SUCCESS_201)
 
@@ -152,6 +159,8 @@ def operate_organizations(organizations, operator):
             try:
                 operate_an_organization(item.id, operator)
                 db.session.commit()
+                details = " " + operator + " organization " + id
+                save_log("Modify", get_jwt_identity(), details)
             except Exception as e:
                 print(f"组织{item.id}操作出错，操作符：{operator}".format())
 

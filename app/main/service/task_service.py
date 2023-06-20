@@ -318,6 +318,11 @@ def operate_a_task(tid, operator):
                     del running_jobs[job_id]
             except Exception as e:
                 print(e)
+        elif tmp_task.type == 'qrcode':
+            return {
+                       "code": "qrcodeTaskNotAllowed",
+                       "message": "qrcode task is not allowed this operation."
+                   }, 400
         elif tmp_task.status == 'finish':
             return {
                        "code": "itemisFinished",
@@ -441,22 +446,6 @@ def send_mail(to_addr, name, subject, context):
         mail.send(msg)
 
 
-# def send_mails_of_task(id):
-#     mail = Mail()
-#     tem_task = Task.query.filter_by(id=id).first()
-#     target_id_list = json.loads(tem_task.target_id_list)
-#     for uid in target_id_list:
-#         tem_user = User.query.filter_by(id=uid).first()
-#         reci = tem_user.email
-#         msg = Message("qqHello "+str(uid), recipients=[reci])
-#         msg.body = "Hello Flask message sent from Flask-Mail"
-#         mail.send(msg)
-#
-#     response_object = {
-#         'code': 'success',
-#         'message': 'success'
-#     }
-#     return response_object, 201
 
 
 

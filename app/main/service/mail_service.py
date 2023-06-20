@@ -109,7 +109,7 @@ def operate_a_mail_template(id, operator):
         else:
             print("日怪嘞")
             return response_with(INVALID_INPUT_422)
-    details = " " + operator + " template " + id
+    details = " " + operator + " template " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     db.session.commit()
     return response_with(SUCCESS_201)
@@ -132,7 +132,7 @@ def update_a_mail_template(id):
         'code': 'success',
         'message': f'Template {id} updated!'.format()
     }
-    details = " update template " + id
+    details = " update template " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 

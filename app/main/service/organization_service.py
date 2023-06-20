@@ -103,7 +103,7 @@ def update_an_organization(id):
         'code': 'success',
         'message': f'Organization {id} updated!'.format()
     }
-    details = " update organization " + id
+    details = " update organization " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 
@@ -147,7 +147,7 @@ def operate_an_organization(id, operator):
             return response_with(INVALID_INPUT_422)
     # tmp_projects, http_code = get_projects_by_organization_id(tmp_organization.id)
     # operate_projects(tmp_projects, operator)
-    details = " " + operator + " organization " + id
+    details = " " + operator + " organization " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     db.session.commit()
     return response_with(SUCCESS_201)
@@ -159,7 +159,7 @@ def operate_organizations(organizations, operator):
             try:
                 operate_an_organization(item.id, operator)
                 db.session.commit()
-                details = " " + operator + " organization " + id
+                details = " " + operator + " organization " + str(id)
                 save_log("Modify", get_jwt_identity(), details)
             except Exception as e:
                 print(f"组织{item.id}操作出错，操作符：{operator}".format())

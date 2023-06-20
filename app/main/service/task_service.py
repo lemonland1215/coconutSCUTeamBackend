@@ -314,7 +314,7 @@ def update_a_task(id):
                     'code': 'success',
                     'message': f'Task {id} updated!'.format()
                 }
-                details = " update task " + id
+                details = " update task " + str(id)
                 return response_object, 201
 
 

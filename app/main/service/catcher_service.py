@@ -41,9 +41,6 @@ def get_a_catcher(id):
 def get_all_catchers():
     return Servercatcher.query.all(), 201
 
-def get_all_catcher_infos():
-    catchers = Servercatcher.query.all()
-    return catchers, 201
 
 @jwt_required()
 def update_a_catcher(id):

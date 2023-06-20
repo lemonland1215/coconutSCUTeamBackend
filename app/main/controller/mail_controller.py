@@ -46,6 +46,7 @@ class MailTemplates(Resource):
             operate_a_mail_template(id, "delete")
         return response_with(SUCCESS_201)
 
+
 @ns.route('/template/<id>')
 @ns.param('id', 'The Mail Template identifier')
 @ns.response(404, 'Template not found.')

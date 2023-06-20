@@ -3,7 +3,7 @@ from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from app.main.service.user_service import save_new_user, get_a_user, get_all_users, get_users_by_org_id, \
-    operate_a_user, search_for_user, update_a_user, delete_users
+    operate_a_user, search_for_user, update_a_user, delete_users, get_project_all_users
 from typing import Dict, Tuple
 from ..util.response_tip import *
 
@@ -41,6 +41,15 @@ class UserList(Resource):
     def delete(self):
         """Delete all users"""
         return delete_users()
+
+@ns.route('/<id>/info')
+@ns.param('id', 'The Project identifier')
+class ProjectUser(Resource):
+    @ns.doc('List all registered users')
+    @ns.marshal_list_with(_user_Out, envelope='children')
+    def get(self, id):
+        """输出指定project<id>的所有用户"""
+        return get_project_all_users(id)
 
 # 直接通过id查询
 @ns.route('/<id>')

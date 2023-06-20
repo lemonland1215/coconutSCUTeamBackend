@@ -18,7 +18,6 @@ def get_a_event(id):
 def get_all_events():
     return Phishingevent.query.all(), 201
 
-@jwt_required()
 def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     new_event = Phishingevent()
     data = request.json
@@ -28,7 +27,6 @@ def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 
 @jwt_required()
 def search_for_events(data):
-    # 编号、名称、创建日期、修改日期、项目id、项目经理id、冻结状态
     tmp_events = Phishingevent.query
     try:
         if data['uid']:

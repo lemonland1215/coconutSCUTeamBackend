@@ -299,9 +299,13 @@ def operate_a_task(tid, operator):
             return response_with(ITEM_LOCKED_400)
         else:
             tmp_task.islocked = False
+            tmp_task.locktime = None
+            tmp_task.lockbyuid = None
     else:
         if operator == "lock":
             tmp_task.islocked = True
+            tmp_task.locktime = datetime.now()
+            tmp_task.lockbyuid = get_jwt_identity()
         elif operator == "delete":
             db.session.delete(tmp_task)
             job_id = "task_" + str(tid)

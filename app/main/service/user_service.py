@@ -23,6 +23,8 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                 'message': 'no such role. please choose between:sysrole/client/staff'
             }
         else:
+            if str(data['sysrole']) == 'sysrole':
+                new_user.orgid = 0
             wj2o(new_user, data)
             save_changes(new_user)
             return generate_token(new_user)
@@ -42,22 +44,28 @@ def get_a_user(id):
     return User.query.filter_by(id=id).first()
 
 def get_project_all_users(id):
-    org_id = Project.query.filter_by(id=id).first().orgid
-    print('orgid',org_id)
-    if org_id:
-        users = User.query.filter_by(orgid=org_id, sysrole='staff').all()
-        if users:
-            return users, 200
+    if Project.query.filter_by(id=id).first():
+        org_id = Project.query.filter_by(id=id).first().orgid
+        print('orgid',org_id)
+        if org_id:
+            users = User.query.filter_by(orgid=org_id, sysrole='staff').all()
+            if users:
+                return users, 200
+            else:
+                return {
+                    'status': 'fail',
+                    'message': 'no such user, please check the sysrole'
+                },404
         else:
             return {
-                'status':'fail',
-                'message':'no such user, please check the sysrole'
-            }
+                'message': 'no such orgid',
+                'status': 'fail'
+            },404
     else:
         return {
-            'message' : 'no such orgid',
-            'status' : 'fail'
-        }
+            'message': 'no such project id',
+            'status': 'fail'
+        },404
 
 
 def generate_token(user: User) -> Tuple[Dict[str, str], int]:

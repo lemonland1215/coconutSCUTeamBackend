@@ -67,11 +67,13 @@ def get_project_all_users(id):
             'status': 'fail'
         },404
 
-def get_org_all_users(id):
-    if Organization.query.filter_by(id=id).all():
+def get_org_all_users(name):
+    tmp_org = Organization.query.filter_by(name=name).first()
+    if tmp_org:
+        org_id = tmp_org.id
         print("here")
-        if id != 0:
-            users = User.query.filter_by(orgid=id, sysrole='client').all()
+        if org_id != 0:
+            users = User.query.filter_by(orgid=org_id, sysrole='client').all()
             if users:
                 return users, 200
             else:
@@ -86,7 +88,7 @@ def get_org_all_users(id):
             },404
     else:
         return {
-            'message': 'no such org id',
+            'message': 'no such org',
             'status': 'fail'
         },404
 

@@ -51,14 +51,14 @@ class ProjectUser(Resource):
         """输出指定project<id>的所有用户(staff)"""
         return get_project_all_users(id)
 
-@ns.route('/<id>/org/info')
-@ns.param('id', 'The Org identifier')
+@ns.route('/<name>/org/info')
+@ns.param('name', 'The Org name')
 class ProjectUser(Resource):
-    @ns.doc('List all registered users by specific org')
+    @ns.doc('List all registered users by specific org name')
     @ns.marshal_list_with(_user_Out, envelope='children')
-    def get(self, id):
-        """输出指定organization<id>的所有用户(client)"""
-        return get_org_all_users(id)
+    def get(self, name):
+        """输出指定organization<name>的所有用户(client)"""
+        return get_org_all_users(name)
 
 # 直接通过id查询
 @ns.route('/<id>')

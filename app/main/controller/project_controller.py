@@ -3,7 +3,7 @@ from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from app.main.service.project_service import save_new_project, get_a_project, get_all_projects, get_projects_by_org_id, \
-    operate_a_project, search_for_project, update_a_project, delete_projects,get_all_project_ids
+    operate_a_project, search_for_project, update_a_project, delete_projects,get_all_project_infos
 from typing import Dict, Tuple
 
 ns = Project_DTO.ns
@@ -23,10 +23,10 @@ class ProjectList(Resource):
         """List all created projects"""
         return get_all_projects()
 
-    @ns.doc('get_all_project_ids')
+    @ns.doc('get_all_project_infos')
     def get(self):
-        """您可以在这里查看已有的project的id"""
-        return get_all_project_ids()
+        """您可以在这里查看已有的project的info"""
+        return get_all_project_infos()
 
     @jwt_required()
     @ns.expect(_project_In, validate=True)

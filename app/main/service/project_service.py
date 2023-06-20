@@ -25,10 +25,10 @@ def get_all_projects():
     return tmp_project.all()
 
 
-def get_all_project_ids():
+def get_all_project_infos():
     projects = Project.query.all()
-    project_ids = [project.id for project in projects]
-    return project_ids, 201
+    # project_ids = [project.id for project in projects]
+    return projects, 201
 
 def save_new_project(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     project = Project.query.filter_by(projectname=data['projectname']).first()

@@ -97,6 +97,7 @@ class User_DTO:
         'sysrole': fields.String(),
         'is_frozen': fields.String(),
         'is_locked': fields.Boolean(),
+        'email': fields.String(),
         'orgid': fields.Integer()
     })
 
@@ -334,7 +335,8 @@ class Sender_DTO:
     })
 
     sender_out = ns.model('sender_out', {
-        'name': fields.String(required=True, description='sender name'),
+        'id': fields.Integer(description='id'),
+        'name': fields.String(description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
         'encryptalg': fields.String(description='加密算法'),
@@ -380,6 +382,7 @@ class Catcher_DTO:
     })
 
     catcher_out = ns.model('catcher_out', {
+        'id': fields.Integer(description='id'),
         'name': fields.String(required=True, description='sender name'),
         'server': fields.String(description='sender IP'),
         'port': fields.Integer(description='sender port'),
@@ -387,10 +390,13 @@ class Catcher_DTO:
         'freezetime': fields.DateTime(description='冻结时间'),
         'islocked': fields.Boolean(description='锁没'),
         'locktime': fields.DateTime(description='锁定时间'),
+        'lockbyuid': fields.DateTime(description='锁定人编号'),
         'createdbyuid': fields.Integer(description='创建者id'),
         'createtime':fields.DateTime(description='创建时间'),
         'modifiedbyuid': fields.Integer(description='修改者id'),
-        'modifytime': fields.DateTime(description='修改时间')
+        'modifytime': fields.DateTime(description='修改时间'),
+        'frozenbyuid': fields.Integer(description='创建者id'),
+        'freezetime': fields.DateTime(description='创建时间'),
     })
 
     catcher_search = ns.model('catcher_search', {

@@ -13,7 +13,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(100), comment='密码hash')
     orgid = db.Column(db.INTEGER, nullable=False, comment='所属机构编号')
     sysrole = db.Column(db.String(255), nullable=False,
-                        comment='系统角色：sysadmin | logadmin | projectadmin | projectowner')
+                        comment='我们公司:sysrole(超级三合一); 对方公司：client(对接人)、staff(普通员工)')
     email = db.Column(db.String(255), unique=True, nullable=False, comment='邮箱')
     comment = db.Column(db.String(50), comment='备注')
     is_locked = db.Column(db.BOOLEAN, default=False, comment='是否锁定')

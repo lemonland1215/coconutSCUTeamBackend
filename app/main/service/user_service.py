@@ -2,6 +2,8 @@ from flask import request
 from app.main import db
 from app.main.model.user import User
 from app.main.model.liaison import Liaison
+from app.main.model.project import Project
+from app.main.model.organization import Organization
 from typing import Dict, Tuple
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from app.main.util.write_json_to_obj import wj2o
@@ -30,6 +32,24 @@ def get_all_users():
 
 def get_a_user(id):
     return User.query.filter_by(id=id).first()
+
+def get_project_all_users(id):
+    org_id = Project.query.filter_by(id=id).first().orgid
+    print('orgid',org_id)
+    if org_id:
+        users = User.query.filter_by(orgid=org_id).all()
+        if users:
+            return users, 200
+        else:
+            return {
+                'status':'fail',
+                'message':'no such user'
+            }
+    else:
+        return {
+            'message' : 'no such orgid',
+            'status' : 'fail'
+        }
 
 
 def generate_token(user: User) -> Tuple[Dict[str, str], int]:

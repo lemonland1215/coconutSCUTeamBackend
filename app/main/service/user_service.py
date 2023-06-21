@@ -45,7 +45,6 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                     details = " create a new user."
                     save_log("Create", get_jwt_identity(), details)
                     return generate_token(new_user)
-
     else:
         response_object = {
             'status': 'fail',

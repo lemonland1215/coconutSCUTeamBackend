@@ -5,6 +5,7 @@ from flask_jwt_extended import jwt_required
 from app.main.service.project_service import save_new_project, get_a_project, get_all_projects, get_projects_by_org_id, \
     operate_a_project, search_for_project, update_a_project, delete_projects, get_project_number
 from typing import Dict, Tuple
+from app.main.util.response_tip import *
 
 ns = Project_DTO.ns
 _project_In = Project_DTO.project_In
@@ -38,11 +39,15 @@ class ProjectList(Resource):
         return save_new_project(data=data)
 
     @jwt_required()
-    @ns.doc('delete all projects')
+    @ns.doc('delete selected projects')
     @ns.response(201, 'Projects deleted!')
+    @ns.expect(_project_IDs_In, validate=True)
     def delete(self):
-        """Delete all projects"""
-        return delete_projects()
+        """Delete selected projects"""
+        projectIDs = request.json
+        for id in projectIDs['id']:
+            operate_a_project(id, "delete")
+        return response_with(SUCCESS_201)
 
 
 @ns.route('/statistics')

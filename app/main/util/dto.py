@@ -177,8 +177,10 @@ class Project_DTO:
         'organization_name': fields.String(required=False, description='organization_name'),
         'is_locked': fields.Boolean(required=False, description='is_locked'),
         'is_frozen': fields.Boolean(required=False, description='is_frozen'),
-        'create_time': CustomDate(required=False, default=datetime.now(), dt_format='str_time', description='create_time'),
-        'modified_time': CustomDate(required=False, default=datetime.now(), dt_format='str_time', description='modified_time')
+        'create_time': CustomDate(required=False, default=datetime.now(), dt_format='str_time',
+                                  description='create_time'),
+        'modified_time': CustomDate(required=False, default=datetime.now(), dt_format='str_time',
+                                    description='modified_time')
     })
 
 
@@ -429,6 +431,7 @@ class Catcher_DTO:
 class File_DTO:
     ns = Namespace('upload', description='file and image related operations')
 
+
 class QR_DTO:
     ns = Namespace('qrcode', description='qrcode related operations')
 
@@ -448,7 +451,7 @@ class Log_DTO:
         'time': fields.String()
     })
 
-    log_Search = ns.model(('log_search'), {
+    log_Search = ns.model('log_search', {
         'id': fields.Integer(required=False, description='log id'),
         'type': fields.String(required=False, description='log type'),
         'operator_id': fields.Integer(required=False, description='operator id'),
@@ -457,3 +460,7 @@ class Log_DTO:
         'details': fields.String(required=False, description='details'),
         'time': fields.String(required=False, description='time')
     })
+
+
+class Statistics_DTO:
+    ns = Namespace('statistics', description='statistics related operations')

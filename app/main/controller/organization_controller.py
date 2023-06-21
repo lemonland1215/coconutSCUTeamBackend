@@ -7,7 +7,7 @@ from app.main import db
 from ..util.dto import OrganizationDTO
 from ..service.organization_service import save_new_organization, get_all_organizations, get_an_organization, \
     get_sub_organizations, update_an_organization, operate_an_organization, search_for_organizations, \
-    get_parent_organization, get_org_by_user_id
+    get_parent_organization, get_org_by_user_id, get_organization_number
 from typing import Dict, Tuple
 
 from ..util.file import upload_file
@@ -65,6 +65,14 @@ class Organizations(Resource):
             """
 
             return upload_file(subdir='logo')
+
+
+@ns.route('/statistics')
+class Statistics(Resource):
+    @ns.doc('Get organization number')
+    def get(self):
+        """ Get organization number """
+        return get_organization_number()
 
 
 @ns.route('/<id>/sub_organization')
@@ -174,5 +182,3 @@ class User(Resource):
             return response_with(INVALID_INPUT_422)
         else:
             return org, 201
-
-

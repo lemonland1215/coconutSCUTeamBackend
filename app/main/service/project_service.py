@@ -61,7 +61,7 @@ def save_new_project(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                     data = request.json
                     wj2o(new_project, data)
                     new_project.client_id = \
-                    list(db.session.query(User.id).filter(User.username == data['project_manager']).first())[0]
+                        list(db.session.query(User.id).filter(User.username == data['project_manager']).first())[0]
                     new_project.project_creator_id = get_jwt_identity()
                     new_project.orgid = list(db.session.query(Organization.id).filter(
                         Organization.name == data['organization_name']).first())[0]
@@ -222,7 +222,7 @@ def search_for_project(data):
 
     try:
         if data['project_creator_name']:
-            tmp_project = tmp_project.filter(creator.username.like("%" + data['project_creator_name'] + "%")).\
+            tmp_project = tmp_project.filter(creator.username.like("%" + data['project_creator_name'] + "%")). \
                 filter(creator.sysrole == "sysrole")
     except:
         print("no such creator name")
@@ -235,7 +235,7 @@ def search_for_project(data):
 
     try:
         if data['project_manager_name']:
-            tmp_project = tmp_project.filter(manager.username.like("%" + data['project_client_name'] + "%")).\
+            tmp_project = tmp_project.filter(manager.username.like("%" + data['project_client_name'] + "%")). \
                 filter(manager.sysrole == "client")
     except:
         print("no such client name")
@@ -302,7 +302,8 @@ def update_a_project(id):
             return "conflict name!", 409
         # 如果有经理
         if update_val['project_manager_name']:
-            if not User.query.filter(User.username == update_val['project_manager_name']).filter(User.sysrole == "client").first():
+            if not User.query.filter(User.username == update_val['project_manager_name']).filter(
+                    User.sysrole == "client").first():
                 return f"no such manager!", 404
         wj2o(tmp_project, update_val)
         print(update_val)
@@ -322,3 +323,11 @@ def update_a_project(id):
 def get_projects_by_org_id(id):
     projects = Project.query.filter_by(orgid=id).all()
     return projects, 201
+
+
+def get_project_number():
+    response_object = {
+        'code': 'success',
+        'number': Project.query.count()
+    }
+    return response_object, 200

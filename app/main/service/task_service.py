@@ -17,8 +17,8 @@ import json
 import ast
 from app.main.service.log_service import save_log
 
-
 running_jobs = {}
+
 
 @jwt_required()
 def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
@@ -44,20 +44,19 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 
                             if date_time < datetime.now():
                                 return {
-                                    "code": "timeisnotallowed",
-                                    "message": "time is earlier than now!!"
-                                }, 405
+                                           "code": "timeisnotallowed",
+                                           "message": "time is earlier than now!!"
+                                       }, 405
                             else:
                                 save_changes(new_task)
                                 job_id = "task_" + str(new_task.id)
                                 ulist = get_a_task_users(new_task.id)
                                 print(ulist)
+
                                 running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq,
                                                         'sendlist': [], 'retry': 0, 'sender': new_task.mail_server_id}
 
-                                # app.config.update(
-                                #     MAIL_SERVER='smtp..com'
-                                # )
+
                                 scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                                   seconds=new_task.delivery_freq, start_date=new_task.delivery_time)
                                 details = " create a new task."
@@ -77,24 +76,24 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                                    }, 405
                     else:
                         return {
-                           "code": "serverNotExist",
-                           "message": "no such mail server, sorry you can't add."
-                        }, 404
+                                   "code": "serverNotExist",
+                                   "message": "no such mail server, sorry you can't add."
+                               }, 404
                 else:
                     return {
-                        "code": "catcherNotExist",
-                        "message": "no such catcher server, sorry you can't add."
-                    }, 404
+                               "code": "catcherNotExist",
+                               "message": "no such catcher server, sorry you can't add."
+                           }, 404
             else:
                 return {
-                    "code": "mailNotExist",
-                    "message": "no such mail, sorry you can't add."
-                }, 404
+                           "code": "mailNotExist",
+                           "message": "no such mail, sorry you can't add."
+                       }, 404
         else:
-            return{
-                "code": "projectNotExist",
-                "message": "no such project, sorry you can't add."
-            }, 404
+            return {
+                       "code": "projectNotExist",
+                       "message": "no such project, sorry you can't add."
+                   }, 404
     else:
         response_object = {
             'status': 'fail',
@@ -109,6 +108,7 @@ def get_a_task(id):
 
 def get_all_tasks():
     return Task.query.all(), 201
+
 
 def get_a_task_users(tid):
     tem_task = Task.query.filter_by(id=tid).first()
@@ -197,9 +197,9 @@ def search_for_tasks(data):
     # print(tmp_tasks.all())
     # print(tmp_projects.all())
     return {
-        'status': 'fail',
-        'message': '看上去没有搜索任何东西呢'
-    },404
+               'status': 'fail',
+               'message': '看上去没有搜索任何东西呢'
+           }, 404
 
 
 @jwt_required()
@@ -215,14 +215,14 @@ def update_a_task(id):
         return response_with(ITEM_LOCKED_400)
     if tmp_task.status == 'finish':
         return {
-            "code": "taskHasFinished",
-            "message": "cannot modify a finish task."
-        }, 405
+                   "code": "taskHasFinished",
+                   "message": "cannot modify a finish task."
+               }, 405
     elif tmp_task.status == 'running':
         return {
-            "code": "taskRunning",
-            "message": "cannot modify a running task."
-        }, 405
+                   "code": "taskRunning",
+                   "message": "cannot modify a running task."
+               }, 405
     elif tmp_task.status == 'waiting':
         update_val = request.json
         update_val['modifiedbyuid'] = get_jwt_identity()
@@ -379,9 +379,9 @@ def operate_a_task(tid, operator):
                         print('task is not running!!!')
                 else:
                     return {
-                        "code": "itemNotFrozen",
-                        "message": "you can't unfreeze a task if it is not frozen."
-                    }, 400
+                               "code": "itemNotFrozen",
+                               "message": "you can't unfreeze a task if it is not frozen."
+                           }, 400
             # elif operator == "begin":
             #     if tmp_task.status == 'waiting':
             #         tmp_task.status = 'running'
@@ -411,6 +411,7 @@ def operate_a_task(tid, operator):
     details = " " + operator + " task " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
+
 
 def send_mails(job_id):
     with app.app_context():
@@ -468,6 +469,7 @@ def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
 
+
 def send_mail(to_addr, name, subject, context, sender):
     mail = Mail()
     app.config.from_mapping(
@@ -483,6 +485,9 @@ def send_mail(to_addr, name, subject, context, sender):
         mail.send(msg)
 
 
-
-
-
+def get_task_number():
+    response_object = {
+        'code': 'success',
+        'number': Task.query.count()
+    }
+    return response_object, 200

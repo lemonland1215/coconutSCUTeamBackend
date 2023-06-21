@@ -34,6 +34,7 @@ def save_new_organization(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 def get_an_organization(id):
     return Organization.query.filter_by(id=id).first(), 201
 
+
 def get_all_organizations():
     return Organization.query.all(), 201
 
@@ -56,14 +57,16 @@ def search_for_organizations(data):
 
     try:
         if data['create_time_start'] and data['create_time_end']:
-            tmp_orgs = tmp_orgs.filter(Organization.createtime.between(data['create_time_start'], data['create_time_end']))
+            tmp_orgs = tmp_orgs.filter(
+                Organization.createtime.between(data['create_time_start'], data['create_time_end']))
             print(tmp_orgs.all())
     except Exception as e:
         print("无create", e)
 
     try:
         if data['modify_time_start'] and data['modify_time_end']:
-            tmp_orgs = tmp_orgs.filter(Organization.modifytime.between(data['modify_time_start'], data['modify_time_end']))
+            tmp_orgs = tmp_orgs.filter(
+                Organization.modifytime.between(data['modify_time_start'], data['modify_time_end']))
     except:
         print("无modi")
 
@@ -81,8 +84,6 @@ def search_for_organizations(data):
 
     print(tmp_orgs.all())
     return tmp_orgs.all(), 201
-
-
 
 
 @jwt_required()
@@ -106,6 +107,7 @@ def update_an_organization(id):
     details = " update organization " + str(id)
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
+
 
 @jwt_required()
 def operate_an_organization(id, operator):
@@ -169,6 +171,7 @@ def get_sub_organizations(higher_organization_id):
     tmp_orgs = Organization.query.filter_by(higherorgid=higher_organization_id).all()
     return tmp_orgs, 201
 
+
 def get_parent_organization(child_organization_id):
     current_org = Organization.query.filter_by(id=child_organization_id).first()
     higher_org_id = current_org.higherorgid
@@ -178,18 +181,26 @@ def get_parent_organization(child_organization_id):
     else:
         return None, 404
 
+
 def get_org_by_user_id(uid):
     print(1)
     orgid = User.query.filter_by(id=uid).first().orgid
     print(orgid)
     return Organization.query.filter_by(id=orgid).first(), 201
 
+
 def get_projects_by_organization_id(oid):
     pass
-
 
 
 def save_changes(data: Organization) -> None:
     db.session.add(data)
     db.session.commit()
 
+
+def get_organization_number():
+    response_object = {
+        'code': 'success',
+        'number': Organization.query.count()
+    }
+    return response_object, 200

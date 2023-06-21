@@ -3,7 +3,7 @@ from flask import request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from app.main.service.project_service import save_new_project, get_a_project, get_all_projects, get_projects_by_org_id, \
-    operate_a_project, search_for_project, update_a_project, delete_projects
+    operate_a_project, search_for_project, update_a_project, delete_projects, get_project_number
 from typing import Dict, Tuple
 
 ns = Project_DTO.ns
@@ -43,6 +43,14 @@ class ProjectList(Resource):
     def delete(self):
         """Delete all projects"""
         return delete_projects()
+
+
+@ns.route('/statistics')
+class Statistics(Resource):
+    @ns.doc('Get project number')
+    def get(self):
+        """ Get project number """
+        return get_project_number()
 
 
 # 直接通过id查询

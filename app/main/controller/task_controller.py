@@ -19,6 +19,7 @@ _task_Search = Task_DTO.searchIn
 _task_Update = Task_DTO.updateIn
 _taskIDsIn = Task_DTO.taskIDsIn
 
+
 @ns.route('/')
 class Tasks(Resource):
 
@@ -46,6 +47,15 @@ class Tasks(Resource):
         for id in taskIDs['id']:
             operate_a_task(id, "delete")
         return response_with(SUCCESS_201)
+
+
+@ns.route('/statistics')
+class Statistics(Resource):
+    @ns.doc('Get task number')
+    def get(self):
+        """ Get task number """
+        return get_task_number()
+
 
 @ns.route('/<id>')
 @ns.param('id', 'The Task identifier')
@@ -77,6 +87,7 @@ class Task(Resource):
         else:
             return task
 
+
 @ns.route('/search')
 class SearchForTasks(Resource):
     """task view"""
@@ -88,6 +99,7 @@ class SearchForTasks(Resource):
         """search for tasks by 编号、名称、创建日期、修改日期、项目id、项目名称、项目经理"""
         data = request.json
         return search_for_tasks(data)
+
 
 @ns.route('/action/<operator>')
 @ns.param('operator', 'such as freeze|unfreeze, lock|unlock, pause|restart, delete etc')
@@ -111,6 +123,7 @@ class PatchTasks(Resource):
 @ns.response(404, 'Task not found.')
 class PatchATask(Resource):
     """task view"""
+
     @ns.doc('modify a task status')
     def patch(self, id, operator):
         """modify the status of a task, status enum: lock|unlock"""
@@ -119,11 +132,3 @@ class PatchATask(Resource):
             ns.abort(404)
         else:
             return operate_a_task(id, operator)
-
-
-
-
-
-
-
-

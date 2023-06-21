@@ -10,8 +10,9 @@ from datetime import datetime
 
 
 def get_all_logs():
-    tmp_log = db.session.query(Log.id, Log.type, Log.operator_id, User.username.label('operator'), Log.role, Log.details,
-                         Log.time).\
+    tmp_log = db.session.query(Log.id, Log.type, Log.operator_id, User.username.label('operator'), Log.role,
+                               Log.details,
+                               Log.time). \
         outerjoin(User, Log.operator_id == User.id)
     return tmp_log.all()
 
@@ -33,3 +34,11 @@ def get_a_log(id):
                                Log.time). \
         outerjoin(User, Log.operator_id == User.id).filter(Log.id == id)
     return tmp_log.first()
+
+
+def get_log_number():
+    response_object = {
+        'code': 'success',
+        'number': Log.query.count()
+    }
+    return response_object, 200

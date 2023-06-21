@@ -13,11 +13,14 @@ from app.main.service.log_service import save_log
 
 running_jobs = {}
 
+
 def get_a_event(id):
     return Phishingevent.query.filter_by(id=id).first(), 201
 
+
 def get_all_events():
     return Phishingevent.query.all(), 201
+
 
 def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     new_event = Phishingevent()
@@ -28,6 +31,7 @@ def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     details = " save a new event."
     save_log("Create", get_jwt_identity(), details)
     return response_with(SUCCESS_201)
+
 
 @jwt_required()
 def search_for_events(data):
@@ -59,6 +63,15 @@ def search_for_events(data):
 
     return tmp_events.all(), 201
 
+
 def save_changes(data: Phishingevent) -> None:
     db.session.add(data)
     db.session.commit()
+
+
+def get_event_number():
+    response_object = {
+        'code': 'success',
+        'number': Phishingevent.query.count()
+    }
+    return response_object, 200

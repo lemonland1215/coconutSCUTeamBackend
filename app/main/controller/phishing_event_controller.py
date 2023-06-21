@@ -16,6 +16,7 @@ _PhishingEventIn = Event_DTO.phishing_event_in
 _PhishingEventOut = Event_DTO.phishing_event_out
 _event_Search = Event_DTO.searchIn
 
+
 @ns.route('/')
 class Phishingevents(Resource):
 
@@ -33,6 +34,14 @@ class Phishingevents(Resource):
         """Creates a new Event """
         data = request.json
         return save_new_event(data=data)
+
+
+@ns.route('/statistics')
+class Statistics(Resource):
+    @ns.doc('Get event number')
+    def get(self):
+        """ Get event number """
+        return get_event_number()
 
 
 @ns.route('/<id>')
@@ -61,6 +70,7 @@ class SearchForEvents(Resource):
         """search for events by 中招人员id、中招任务id、捕获用服务器id、发送方服务器id"""
         data = request.json
         return search_for_events(data)
+
 
 @ns.route('/receive/<int:uid>/<int:tid>')
 class ReceiveEvent(Resource):

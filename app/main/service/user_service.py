@@ -137,6 +137,10 @@ def get_users_by_org_id(id):
 
 def operate_a_user(id, operator):
     tmp_user = User.query.filter_by(id=id).first()
+    operat_id = get_jwt_identity()
+    operat_user = list(db.session.query(User.sysrole).filter(User.id == operat_id).first())[0]
+    if operat_user == "staff":
+        return f"no permission!", 403
     if not tmp_user:
         return "ITEM_NOT_EXISTS", 404
     if tmp_user.is_locked:
@@ -227,7 +231,7 @@ def update_a_user(id):
     if not tmp_user:
         return "no that user", 404
     if tmp_user.is_locked == True:
-        return "book record locked!", 401
+        return "user record locked!", 401
     update_val = request.json
     # update_val['lastmodifiedbyuid'] = get_jwt_identity()
     wj2o(tmp_user, update_val)
@@ -240,3 +244,11 @@ def update_a_user(id):
     details = " update user" + id
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
+
+
+def get_user_number():
+    response_object = {
+        'code': 'success',
+        'number': User.query.count()
+    }
+    return response_object, 200

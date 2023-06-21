@@ -28,23 +28,24 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                 # wj2o(new_user, data)
                 new_user.orgid = 0
                 save_changes(new_user)
+                details = " create a new user."
+                save_log("Create", get_jwt_identity(), details)
                 return generate_token(new_user)
             else:
                 print(new_user.orgid)
                 if new_user.orgid == 0:
                     print(type(new_user.orgid))
                     return {
-                        'status': 'fail',
-                        'message': 'no such org ,org_id should >= 1'
-                    }, 400
+                               'status': 'fail',
+                               'message': 'no such org ,org_id should >= 1'
+                           }, 400
                 else:
                     # wj2o(new_user, data)
                     save_changes(new_user)
+                    details = " create a new user."
+                    save_log("Create", get_jwt_identity(), details)
                     return generate_token(new_user)
-            save_changes(new_user)
-            details = " create a new user."
-            save_log("Create", get_jwt_identity(), details)
-            return generate_token(new_user)
+
     else:
         response_object = {
             'status': 'fail',
@@ -134,7 +135,7 @@ def get_users_by_org_id(id):
     users = User.query.filter_by(orgid=id).all()
     return users, 200
 
-
+# @jwt_required()
 def operate_a_user(id, operator):
     tmp_user = User.query.filter_by(id=id).first()
     operat_id = get_jwt_identity()
@@ -173,7 +174,7 @@ def operate_a_user(id, operator):
     save_log("Modify", get_jwt_identity(), details)
     return response_object, 201
 
-
+# @jwt_required()
 def delete_users():
     user = User.query.all()
     for tmp_user in user:

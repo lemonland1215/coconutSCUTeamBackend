@@ -38,9 +38,9 @@ def apply_caching(response):
 
 
 
-@app_catcher.cli.command("run_catcher")
-def run_catcher():
-    app_catcher.run(host='0.0.0.0', port=6000)
+# @app_catcher.cli.command("run_catcher")
+# def run_catcher():
+#     app_catcher.run(host='0.0.0.0', port=6000)
 
 @app.cli.command("run")
 def run():
@@ -69,9 +69,9 @@ def create():
     Serversender.init_db()
     return "db inited"
 
-@app_catcher.route("/")
-def index():
-    return render_template("dy.html")
+# @app_catcher.route("/")
+# def index():
+#     return render_template("dy.html")
 
 
 if __name__ == '__main__':
@@ -79,6 +79,6 @@ if __name__ == '__main__':
 #     cli = FlaskGroup(app_catcher)
 #     print(cli.commands)
 
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5100)
     # app_catcher.run(host='0.0.0.0', port=6000)
 

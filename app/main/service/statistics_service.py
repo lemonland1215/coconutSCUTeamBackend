@@ -9,11 +9,11 @@ from app.main.model.phishing_event import Phishingevent
 def get_statistics():
     response_object = {
         'code': 'success',
-        'user number': User.query.count(),
-        'organization number': Organization.query.count(),
-        'project number': Project.query.count(),
-        'task number': Task.query.count(),
-        'event number': Phishingevent.query.count(),
-        'log number': Log.query.count()
+        'user_number': User.query.count(),
+        'organization_number': Organization.query.count(),
+        'project_number': Project.query.count(),
+        'task_number': Task.query.count(),
+        'event_number': Phishingevent.query.count(),
+        'log_number': Log.query.count()
     }
     return response_object, 200

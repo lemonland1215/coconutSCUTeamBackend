@@ -52,10 +52,12 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                                 job_id = "task_" + str(new_task.id)
                                 ulist = get_a_task_users(new_task.id)
                                 print(ulist)
-                                sender = Serversender.query.filter(Serversender.id == new_task.mail_server_id).first()
-                                server_sender = sender.server
                                 running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq,
-                                                        'sendlist': [], 'retry': 0, 'sender': server_sender}
+                                                        'sendlist': [], 'retry': 0, 'sender': new_task.mail_server_id}
+
+                                # app.config.update(
+                                #     MAIL_SERVER='smtp..com'
+                                # )
                                 scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                                   seconds=new_task.delivery_freq, start_date=new_task.delivery_time)
                                 details = " create a new task."
@@ -243,10 +245,8 @@ def update_a_task(id):
                 scheduler.remove_job(job_id)
             except Exception as e:
                 print(e)
-            sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
-            server_sender = sender.server
             running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                    'sendlist': [], 'retry': 0, 'sender': server_sender}
+                                    'sendlist': [], 'retry': 0, 'sender': tmp_task.mail_server_id}
 
             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                               seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
@@ -266,8 +266,7 @@ def update_a_task(id):
         # if delivery_time is not changed
         if tmp_task.delivery_time == old_delivery_time and tmp_task.target_id_list == old_target_id_list and tmp_task.delivery_freq == old_frq:
             job_id = "task_" + str(tmp_task.id)
-            sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
-            running_jobs[job_id]['sender'] = sender
+            running_jobs[job_id]['sender'] = tmp_task.mail_server_id
             save_changes(tmp_task)
             response_object = {
                 'code': 'success',
@@ -279,8 +278,7 @@ def update_a_task(id):
             save_changes(tmp_task)
             job_id = "task_" + str(tmp_task.id)
             scheduler.remove_job(job_id)
-            sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
-            running_jobs[job_id]['sender'] = sender
+            running_jobs[job_id]['sender'] = tmp_task.mail_server_id
             running_jobs[job_id]['interval_seconds'] = tmp_task.delivery_freq
             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                               seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
@@ -303,10 +301,8 @@ def update_a_task(id):
                 ulist = get_a_task_users(tmp_task.id)
                 print(ulist)
                 scheduler.remove_job(job_id)
-                sender = Serversender.query.filter(Serversender.id == tmp_task.mail_server_id).first()
-                running_jobs[job_id]['sender'] = sender
                 running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                        'sendlist': [], 'retry': 0, 'sender': sender}
+                                        'sendlist': [], 'retry': 0, 'sender': tmp_task.mail_server_id}
                 scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                   seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
                 scheduler.pause_job(id=job_id)
@@ -421,10 +417,14 @@ def send_mails(job_id):
         if job_id in running_jobs:
             ulist = running_jobs[job_id]['u_list']
             sendlist = running_jobs[job_id]['sendlist']
-            sender = running_jobs[job_id]['sender']
+
+
             tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
+            tmp_sender = Serversender.query.filter_by(id=running_jobs[job_id]['sender']).first()
+
             if len(sendlist) < len(ulist):
                 tmp_task.status = 'running'
+                tmp_sender.status = 'busy'
                 mailtempid = tmp_task.mail_id
                 tmp_mtemplate = Mailtemplate.query.filter_by(id=mailtempid).first()
                 subject = tmp_mtemplate.subject
@@ -434,11 +434,11 @@ def send_mails(job_id):
                 tmp_em = tmp_user.email
                 tmp_name = tmp_user.username
                 db.session.commit()
-                user = {'name': tmp_name, 'uid': next_uid, 'tid': running_jobs[job_id]['tid']}
+                user = {'name': tmp_name, 'uid': next_uid, 'tid': running_jobs[job_id]['tid'], 'url': 'http://192.168.43.76:5004'}
                 content = render_template_string(content, user=user)
                 print(content)
                 try:
-                    send_mail(tmp_em, tmp_name, subject, content)
+                    send_mail(tmp_em, tmp_name, subject, content, tmp_sender)
                 except Exception as e:
                     running_jobs[job_id]['retry'] += 1
                     print(running_jobs[job_id]['retry'])
@@ -451,6 +451,7 @@ def send_mails(job_id):
                     running_jobs[job_id]['retry'] = 0
             else:
                 tmp_task.status = 'finish'
+                tmp_sender.status = 'open'
                 try:
                     scheduler.remove_job(job_id)
                     del running_jobs[job_id]
@@ -467,8 +468,15 @@ def save_changes(data: Task) -> None:
     db.session.add(data)
     db.session.commit()
 
-def send_mail(to_addr, name, subject, context):
+def send_mail(to_addr, name, subject, context, sender):
     mail = Mail()
+    app.config.from_mapping(
+        MAIL_SERVER=sender.server,
+        MAIL_PORT=sender.port,
+        MAIL_USERNAME=sender.name,
+        MAIL_PASSWORD=sender.password
+    )
+    mail.init_app(app)
     with app.app_context():
         msg = Message(name + subject, recipients=[to_addr])
         msg.html = context

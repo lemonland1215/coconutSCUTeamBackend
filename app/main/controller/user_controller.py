@@ -35,12 +35,16 @@ class UserList(Resource):
         data = request.json
         return save_new_user(data=data)
 
-    @ns.doc('delete all users')
+    @ns.doc('delete selected users')
     @jwt_required()
     @ns.response(201, 'Users deleted!')
+    @ns.expect(_user_IDs_In, validate=True)
     def delete(self):
-        """Delete all users"""
-        return delete_users()
+        """Delete selected users"""
+        userIDs = request.json
+        for id in userIDs['id']:
+            operate_a_user(id, "delete")
+        return response_with(SUCCESS_201)
 
 
 @ns.route('/statistics')

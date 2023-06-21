@@ -28,6 +28,8 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                 # wj2o(new_user, data)
                 new_user.orgid = 0
                 save_changes(new_user)
+                details = " create a new user."
+                save_log("Create", get_jwt_identity(), details)
                 return generate_token(new_user)
             else:
                 print(new_user.orgid)
@@ -40,11 +42,9 @@ def save_new_user(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                 else:
                     # wj2o(new_user, data)
                     save_changes(new_user)
+                    details = " create a new user."
+                    save_log("Create", get_jwt_identity(), details)
                     return generate_token(new_user)
-            save_changes(new_user)
-            details = " create a new user."
-            save_log("Create", get_jwt_identity(), details)
-            return generate_token(new_user)
     else:
         response_object = {
             'status': 'fail',

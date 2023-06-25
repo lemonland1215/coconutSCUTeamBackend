@@ -75,10 +75,6 @@ def create():
 
 
 if __name__ == '__main__':
-    # cli()
-#     cli = FlaskGroup(app_catcher)
-#     print(cli.commands)
-
     app.run(host='0.0.0.0', port=5000)
     # app_catcher.run(host='0.0.0.0', port=6000)
 

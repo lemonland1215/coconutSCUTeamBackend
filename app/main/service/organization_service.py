@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import request
 from app.main import db
 from app.main.model.organization import Organization
+from app.main.model.project import Project
 from typing import Dict, Tuple
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -190,7 +191,7 @@ def get_org_by_user_id(uid):
 
 
 def get_projects_by_organization_id(oid):
-    pass
+    return Project.query.filter_by(orgid=oid).all(), 201
 
 
 def save_changes(data: Organization) -> None:

@@ -29,7 +29,7 @@ def save_new_event(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     wj2o(new_event, data)
     save_changes(new_event)
     details = " save a new event."
-    save_log("Create", get_jwt_identity(), details)
+    save_log("Create", new_event.uid, details)
     return response_with(SUCCESS_201)
 
 

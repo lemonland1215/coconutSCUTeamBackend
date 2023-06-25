@@ -33,3 +33,6 @@ def create_catcher_app():
             # template_folder = os.path.join(BASE_DIR, 'templates') # 配置模板文件的文件夹
             )
     return app
+
+
+

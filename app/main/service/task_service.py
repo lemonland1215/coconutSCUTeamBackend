@@ -54,7 +54,7 @@ def save_new_task(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
                                 print(ulist)
 
                                 running_jobs[job_id] = {'tid': new_task.id, 'u_list': ulist, 'interval_seconds': new_task.delivery_freq,
-                                                        'sendlist': [], 'retry': 0, 'sender': new_task.mail_server_id}
+                                                        'sendlist': [], 'retry': 0, 'sender': new_task.mail_server_id, 'catcher': new_task.catcher_id}
 
 
                                 scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
@@ -246,7 +246,7 @@ def update_a_task(id):
             except Exception as e:
                 print(e)
             running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                    'sendlist': [], 'retry': 0, 'sender': tmp_task.mail_server_id}
+                                    'sendlist': [], 'retry': 0, 'sender': tmp_task.mail_server_id, 'catcher': tmp_task.catcher_id}
 
             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                               seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
@@ -263,22 +263,24 @@ def update_a_task(id):
         date_format = '%Y-%m-%d %H:%M:%S.%f'
         date_time = datetime.strptime(tmp_task.delivery_time, date_format)
         tmp_task.delivery_time = date_time
-        # if delivery_time is not changed
+        # if delivery_freq is not changed
         if tmp_task.delivery_time == old_delivery_time and tmp_task.target_id_list == old_target_id_list and tmp_task.delivery_freq == old_frq:
             job_id = "task_" + str(tmp_task.id)
             running_jobs[job_id]['sender'] = tmp_task.mail_server_id
+            running_jobs[job_id]['catcher'] = tmp_task.catcher_id
             save_changes(tmp_task)
             response_object = {
                 'code': 'success',
                 'message': f'Task {id} updated!'.format()
             }
             return response_object, 201
-        # if delivery_time is changed
+        # if delivery_freq is changed
         elif tmp_task.delivery_time == old_delivery_time and tmp_task.target_id_list == old_target_id_list:
             save_changes(tmp_task)
             job_id = "task_" + str(tmp_task.id)
             scheduler.remove_job(job_id)
             running_jobs[job_id]['sender'] = tmp_task.mail_server_id
+            running_jobs[job_id]['catcher'] = tmp_task.catcher_id
             running_jobs[job_id]['interval_seconds'] = tmp_task.delivery_freq
             scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                               seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
@@ -302,7 +304,7 @@ def update_a_task(id):
                 print(ulist)
                 scheduler.remove_job(job_id)
                 running_jobs[job_id] = {'tid': tmp_task.id, 'u_list': ulist, 'interval_seconds': tmp_task.delivery_freq,
-                                        'sendlist': [], 'retry': 0, 'sender': tmp_task.mail_server_id}
+                                        'sendlist': [], 'retry': 0, 'sender': tmp_task.mail_server_id, 'catcher': tmp_task.catcher_id}
                 scheduler.add_job(func=send_mails, trigger='interval', args=[job_id], id=job_id,
                                   seconds=tmp_task.delivery_freq, start_date=tmp_task.delivery_time)
                 scheduler.pause_job(id=job_id)
@@ -335,13 +337,14 @@ def operate_a_task(tid, operator):
             tmp_task.lockbyuid = get_jwt_identity()
         elif operator == "delete":
             db.session.delete(tmp_task)
-            job_id = "task_" + str(tid)
-            try:
-                scheduler.remove_job(job_id)
-                if job_id in running_jobs:
-                    del running_jobs[job_id]
-            except Exception as e:
-                print(e)
+            if tmp_task.type == 'mail':
+                job_id = "task_" + str(tid)
+                try:
+                    scheduler.remove_job(job_id)
+                    if job_id in running_jobs:
+                        del running_jobs[job_id]
+                except Exception as e:
+                    print(e)
         elif tmp_task.type == 'qrcode':
             return {
                        "code": "qrcodeTaskNotAllowed",
@@ -422,6 +425,7 @@ def send_mails(job_id):
 
             tmp_task = Task.query.filter_by(id=running_jobs[job_id]['tid']).first()
             tmp_sender = Serversender.query.filter_by(id=running_jobs[job_id]['sender']).first()
+            tmp_catcher = Servercatcher.query.filter_by(id=running_jobs[job_id]['catcher']).first()
 
             if len(sendlist) < len(ulist):
                 tmp_task.status = 'running'
@@ -434,8 +438,9 @@ def send_mails(job_id):
                 tmp_user = User.query.filter_by(id=next_uid).first()
                 tmp_em = tmp_user.email
                 tmp_name = tmp_user.username
+                tmp_url = 'http://' + tmp_catcher.server + ':' + str(tmp_catcher.port)
                 db.session.commit()
-                user = {'name': tmp_name, 'uid': next_uid, 'tid': running_jobs[job_id]['tid'], 'url': 'http://192.168.43.76:5004'}
+                user = {'name': tmp_name, 'uid': next_uid, 'tid': running_jobs[job_id]['tid'], 'url': tmp_url}
                 content = render_template_string(content, user=user)
                 print(content)
                 try:

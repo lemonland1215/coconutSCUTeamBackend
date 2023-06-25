@@ -16,7 +16,7 @@ def get_all_logs():
         outerjoin(User, Log.operator_id == User.id)
     return tmp_log.all()
 
-@jwt_required()
+
 def save_log(type, userid, description):
     login = Log()
     login.type = type

@@ -1,7 +1,5 @@
 from flask import Flask
 from flask_apscheduler import APScheduler
-from flask_mail import Mail, Message
-from configures.development import QqMailConfig, MsMailConfig
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -46,7 +44,8 @@ end_date = datetime.now() + timedelta(minutes=20)
 @app.route("/task1")
 def task1():
     # Add the first task to the scheduler
-    scheduler.add_job(func=send_email, args=('循环任务1：',), trigger='interval', seconds=3, id='send_email_job_1', start_date=start_date, end_date=end_date)
+    scheduler.add_job(func=send_email, args=('循环任务1：',), trigger='interval', seconds=3, id='send_email_job_1',
+                      start_date=start_date, end_date=end_date)
     return "task1 add"
 
 @app.route("/task2")

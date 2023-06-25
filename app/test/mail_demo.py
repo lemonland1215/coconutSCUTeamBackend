@@ -38,6 +38,7 @@ def sendbyqq():
     mail.init_app(app)
     msg = Message("qqHello", recipients=["winshine_new@qq.com"])
     msg.body = "Hello Flask message sent from Flask-Mail"
+    msg.html = "<p>hello world</p>"
     mail.send(msg)
     return "from qq, sent!"
 

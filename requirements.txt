@@ -27,3 +27,7 @@ Werkzeug~=2.2.3
 
 apscheduler~=3.10.1
 pillow~=9.5.0
+
+flask-mail
+qrcode
+flask-jwt-extended
